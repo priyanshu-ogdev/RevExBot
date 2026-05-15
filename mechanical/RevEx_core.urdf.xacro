@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="RevEx_Core" xmlns:xacro="http://wiki.ros.org/xacro">
+
+  <material name="Grey"><color rgba="0.6 0.6 0.6 1.0" /></material>
+  <material name="DarkGrey"><color rgba="0.22 0.22 0.22 1.0" /></material>
+  <material name="LightGrey"><color rgba="0.8 0.8 0.8 1.0" /></material>
+
+  <link name="pelvis_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/IMU_ORIGIN.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+
+  <link name="left_hip_pitch_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_HIP_PITCH.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_hip_pitch_joint" type="revolute">
+    <origin xyz="-0.052 0.0675 -0.044045" rpy="0 0 0" />
+    <parent link="pelvis_link" />
+    <child link="left_hip_pitch_link" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.094" upper="1.047" effort="120" velocity="8" />
+  </joint>
+
+  <link name="left_hip_roll_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_HIP_ROLL.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_hip_roll_joint" type="revolute">
+    <origin xyz="0.0422501 0.0400002759400924 0" rpy="0 0 0" />
+    <parent link="left_hip_pitch_link" />
+    <child link="left_hip_roll_link" />
+    <axis xyz="1 0 0" />
+    <limit lower="-0.698" upper="0.698" effort="100" velocity="8" />
+  </joint>
+
+  <link name="left_hip_yaw_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_HIP_YAW.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_hip_yaw_joint" type="revolute">
+    <origin xyz="-0.0422499999999954 0 -0.0520000000000006" rpy="0 0 0" />
+    <parent link="left_hip_roll_link" />
+    <child link="left_hip_yaw_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-0.698" upper="0.698" effort="80" velocity="8" />
+  </joint>
+
+  <link name="left_knee_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_KNEE.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_knee_joint" type="revolute">
+    <origin xyz="0 0 -0.195639999999998" rpy="0 0 0" />
+    <parent link="left_hip_yaw_link" />
+    <child link="left_knee_link" />
+    <axis xyz="0 1 0" />
+    <limit lower="0" upper="2.094" effort="150" velocity="8" />
+  </joint>
+
+  <link name="left_ankle_pitch_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_ANKLE_A.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_ankle_pitch_joint" type="revolute">
+    <origin xyz="0 0 -0.294662336087024" rpy="0 0 0" />
+    <parent link="left_knee_link" />
+    <child link="left_ankle_pitch_link" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.698" upper="0.698" effort="80" velocity="8" />
+  </joint>
+
+  <link name="left_ankle_roll_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_ANKLE_B.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_ankle_roll_joint" type="revolute">
+    <origin xyz="-0.00149999999999975 0 -0.00999999200000223" rpy="0 0 0" />
+    <parent link="left_ankle_pitch_link" />
+    <child link="left_ankle_roll_link" />
+    <axis xyz="-1 0 0" />
+    <limit lower="-0.349" upper="0.349" effort="50" velocity="8" />
+  </joint>
+
+  <link name="left_toe_link">
+    <visual>
+      <origin xyz="0 0.008 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_TOE.STL" /></geometry>
+      <material name="DarkGrey" />
+    </visual>
+  </link>
+  <joint name="left_toe_joint" type="revolute">
+    <origin xyz="0.10253 -0.0043664 -0.0067324" rpy="0 0 0" />
+    <parent link="left_ankle_roll_link" />
+    <child link="left_toe_link" />
+    <axis xyz="0.010532 0.99994 0" />
+    <limit lower="-1.047" upper="0.349" effort="30" velocity="8" />
+  </joint>
+
+  <link name="right_hip_pitch_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_HIP_PITCH.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_hip_pitch_joint" type="revolute">
+    <origin xyz="-0.0519999999999999 -0.0675 -0.0440449999999999" rpy="0 0 0" />
+    <parent link="pelvis_link" />
+    <child link="right_hip_pitch_link" />
+    <axis xyz="0 -1 0" />
+    <limit lower="-1.047" upper="2.094" effort="120" velocity="8" />
+  </joint>
+
+  <link name="right_hip_roll_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_HIP_ROLL.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_hip_roll_joint" type="revolute">
+    <origin xyz="0.04225 -0.04 0" rpy="0 0 0" />
+    <parent link="right_hip_pitch_link" />
+    <child link="right_hip_roll_link" />
+    <axis xyz="1 0 0" />
+    <limit lower="-0.698" upper="0.698" effort="100" velocity="8" />
+  </joint>
+
+  <link name="right_hip_yaw_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_HIP_YAW.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_hip_yaw_joint" type="revolute">
+    <origin xyz="-0.0422499999999986 0 -0.0520000000000019" rpy="0 0 0" />
+    <parent link="right_hip_roll_link" />
+    <child link="right_hip_yaw_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-0.698" upper="0.698" effort="80" velocity="8" />
+  </joint>
+
+  <link name="right_knee_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_KNEE.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_knee_joint" type="revolute">
+    <origin xyz="0 0 -0.195639999999998" rpy="0 0 0" />
+    <parent link="right_hip_yaw_link" />
+    <child link="right_knee_link" />
+    <axis xyz="0 -1 0" />
+    <limit lower="-2.094" upper="0" effort="150" velocity="8" />
+  </joint>
+
+  <link name="right_ankle_pitch_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_ANKLE_A.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_ankle_pitch_joint" type="revolute">
+    <origin xyz="0 0.0001 -0.294662336087023" rpy="0 0 0" />
+    <parent link="right_knee_link" />
+    <child link="right_ankle_pitch_link" />
+    <axis xyz="0 -1 0" />
+    <limit lower="-0.698" upper="0.698" effort="80" velocity="8" />
+  </joint>
+
+  <link name="right_ankle_roll_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_ANKLE_B.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_ankle_roll_joint" type="revolute">
+    <origin xyz="-0.0015 0 -0.00999999200000001" rpy="0 0 0" />
+    <parent link="right_ankle_pitch_link" />
+    <child link="right_ankle_roll_link" />
+    <axis xyz="-1 0 0" />
+    <limit lower="-0.349" upper="0.349" effort="50" velocity="8" />
+  </joint>
+
+  <link name="right_toe_link">
+    <visual>
+      <origin xyz="0 -0.008 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_TOE.STL" /></geometry>
+      <material name="DarkGrey" />
+    </visual>
+  </link>
+  <joint name="right_toe_joint" type="revolute">
+    <origin xyz="0.10247 0.0042796 -0.0067324" rpy="0 0 0" />
+    <parent link="right_ankle_roll_link" />
+    <child link="right_toe_link" />
+    <axis xyz="0.0074685 -0.99997 0" />
+    <limit lower="-0.349" upper="1.047" effort="30" velocity="8" />
+  </joint>
+
+  <link name="waist_yaw_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/WAIST_YAW.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="waist_yaw_joint" type="revolute">
+    <origin xyz="-0.052 0 0.074755" rpy="0 0 0" />
+    <parent link="pelvis_link" />
+    <child link="waist_yaw_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-1.047" upper="1.047" effort="150" velocity="5" />
+  </joint>
+
+  <link name="neck_yaw_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/HEAD.stl" /></geometry>
+      <material name="LightGrey" />
+    </visual>
+  </link>
+  <joint name="neck_yaw_joint" type="revolute">
+    <origin xyz="-0.0165987745492247 0 0.37816702955645" rpy="0 0 0" />
+    <parent link="waist_yaw_link" />
+    <child link="neck_yaw_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-1.571" upper="1.571" effort="20" velocity="5" />
+  </joint>
+  <link name="right_shoulder_pitch_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_SHOULDER_PITCH.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_shoulder_pitch_joint" type="revolute">
+    <origin xyz="-0.0262128253533167 -0.0964999999999998 0.261140483320038" rpy="0 0 0" />
+    <parent link="waist_yaw_link" />
+    <child link="right_shoulder_pitch_link" />
+    <axis xyz="0 -1 0" />
+    <limit lower="-0.872" upper="3.141" effort="80" velocity="6" />
+  </joint>
+
+  <link name="right_shoulder_roll_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_SHOULDER_ROLL.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_shoulder_roll_joint" type="revolute">
+    <origin xyz="0 -0.0653532232325457 -6.33413504113611E-05" rpy="0 0 0" />
+    <parent link="right_shoulder_pitch_link" />
+    <child link="right_shoulder_roll_link" />
+    <axis xyz="-1 0 0" />
+    <limit lower="0" upper="1.571" effort="80" velocity="6" />
+  </joint>
+
+  <link name="right_shoulder_yaw_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_SHOULDER_YAW.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_shoulder_yaw_joint" type="revolute">
+    <origin xyz="0 0 -0.128998749978416" rpy="0 0 0" />
+    <parent link="right_shoulder_roll_link" />
+    <child link="right_shoulder_yaw_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-1.571" upper="1.571" effort="60" velocity="6" />
+  </joint>
+
+  <link name="right_elbow_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_ELBOW.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_elbow_joint" type="revolute">
+    <origin xyz="0 0 -0.0966012999998862" rpy="0 0 0" />
+    <parent link="right_shoulder_yaw_link" />
+    <child link="right_elbow_link" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.443" upper="0" effort="60" velocity="6" />
+  </joint>
+
+  <link name="right_wrist_yaw_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/RIGHT_WRIST_YAW.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="right_wrist_yaw_joint" type="revolute">
+    <origin xyz="0.0865630220726329 0 -0.0726349998945883" rpy="0 0 0" />
+    <parent link="right_elbow_link" />
+    <child link="right_wrist_yaw_link" />
+    <axis xyz="0.766 0 -0.642" />
+    <limit lower="-3.141" upper="3.141" effort="30" velocity="8" />
+  </joint>
+
+  <link name="left_shoulder_pitch_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_SHOULDER_PITCH.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_shoulder_pitch_joint" type="revolute">
+    <origin xyz="-0.0262128253533159 0.0965000000000001 0.261140483320038" rpy="0 0 0" />
+    <parent link="waist_yaw_link" />
+    <child link="left_shoulder_pitch_link" />
+    <axis xyz="0 1 0" />
+    <limit lower="-3.141" upper="0.872" effort="80" velocity="6" />
+  </joint>
+
+  <link name="left_shoulder_roll_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_SHOULDER_ROLL.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_shoulder_roll_joint" type="revolute">
+    <origin xyz="0.000100000000001779 0.0653532232325531 0" rpy="0 0 0" />
+    <parent link="left_shoulder_pitch_link" />
+    <child link="left_shoulder_roll_link" />
+    <axis xyz="-1 0 0" />
+    <limit lower="-1.571" upper="0" effort="80" velocity="6" />
+  </joint>
+
+  <link name="left_shoulder_yaw_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_SHOULDER_YAW.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_shoulder_yaw_joint" type="revolute">
+    <origin xyz="0 0 -0.128998749978194" rpy="0 0 0" />
+    <parent link="left_shoulder_roll_link" />
+    <child link="left_shoulder_yaw_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-1.571" upper="1.571" effort="60" velocity="6" />
+  </joint>
+
+  <link name="left_elbow_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_ELBOW.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_elbow_joint" type="revolute">
+    <origin xyz="0 0 -0.0963013000001065" rpy="0 0 0" />
+    <parent link="left_shoulder_yaw_link" />
+    <child link="left_elbow_link" />
+    <axis xyz="0 -1 0" />
+    <limit lower="0" upper="2.443" effort="60" velocity="6" />
+  </joint>
+
+  <link name="left_wrist_yaw_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="meshes/LEFT_WRIST_YAW.STL" /></geometry>
+      <material name="Grey" />
+    </visual>
+  </link>
+  <joint name="left_wrist_yaw_joint" type="revolute">
+    <origin xyz="0.0865630220759433 0 -0.0726349998946764" rpy="0 0 0" />
+    <parent link="left_elbow_link" />
+    <child link="left_wrist_yaw_link" />
+    <axis xyz="0.766 0 -0.642" />
+    <limit lower="-3.141" upper="3.141" effort="30" velocity="8" />
+  </joint>
