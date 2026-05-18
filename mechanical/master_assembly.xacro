@@ -356,7 +356,7 @@
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry><mesh filename="${mesh_dir}/head.stl" /></geometry>
+      <geometry><mesh filename="${mesh_dir}/HEAD.STL" /></geometry>
       <material name="LightGrey" />
     </visual>
     <collision>
@@ -414,7 +414,7 @@
     <visual><geometry><mesh filename="${mesh_dir}/RIGHT_SHOULDER_PITCH.STL" /></geometry><material name="Grey" /></visual>
   </link>
   <joint name="right_shoulder_pitch_joint" type="revolute">
-    <origin xyz="-0.0262128253533167 -0.0964999999999998 0.261140483320038" rpy="0 -0.436332 0" />
+    <origin xyz="-0.0262128253533167 -0.0964999999999998 0.261140483320038" rpy="-0.261799 0 0" />
     <parent link="waist_yaw_link" /><child link="right_shoulder_pitch_link" />
     <axis xyz="0 -1 0" />
     <limit lower="-0.872" upper="3.141" effort="80" velocity="6" />
@@ -490,7 +490,7 @@
     <visual><geometry><mesh filename="${mesh_dir}/LEFT_SHOULDER_PITCH.STL" /></geometry><material name="Grey" /></visual>
   </link>
   <joint name="left_shoulder_pitch_joint" type="revolute">
-    <origin xyz="-0.0262128253533159 0.0965000000000001 0.261140483320038" rpy="0 -0.436332 0" />
+    <origin xyz="-0.0262128253533159 0.0965000000000001 0.261140483320038" rpy="0.261799 0 0" />
     <parent link="waist_yaw_link" /><child link="left_shoulder_pitch_link" />
     <axis xyz="0 1 0" />
     <limit lower="-3.141" upper="0.872" effort="80" velocity="6" />

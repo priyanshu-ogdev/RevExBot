@@ -441,7 +441,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="C:/Projects/RevExBot/RevEx_Phase1_Hardware/mechanical/meshes/head.stl"/>
+        <mesh filename="C:/Projects/RevExBot/RevEx_Phase1_Hardware/mechanical/meshes/HEAD.STL"/>
       </geometry>
       <material name="LightGrey"/>
     </visual>
@@ -498,7 +498,7 @@
     </visual>
   </link>
   <joint name="right_shoulder_pitch_joint" type="revolute">
-    <origin rpy="0 -0.436332 0" xyz="-0.0262128253533167 -0.0964999999999998 0.261140483320038"/>
+    <origin rpy="-0.261799 0 0" xyz="-0.0262128253533167 -0.0964999999999998 0.261140483320038"/>
     <parent link="waist_yaw_link"/>
     <child link="right_shoulder_pitch_link"/>
     <axis xyz="0 -1 0"/>
@@ -594,7 +594,7 @@
     </visual>
   </link>
   <joint name="left_shoulder_pitch_joint" type="revolute">
-    <origin rpy="0 -0.436332 0" xyz="-0.0262128253533159 0.0965000000000001 0.261140483320038"/>
+    <origin rpy="0.261799 0 0" xyz="-0.0262128253533159 0.0965000000000001 0.261140483320038"/>
     <parent link="waist_yaw_link"/>
     <child link="left_shoulder_pitch_link"/>
     <axis xyz="0 1 0"/>
@@ -938,7 +938,7 @@
     <inertial>
       <mass value="0.012"/>
       <origin xyz="0 0 0.012"/>
-      <inertia ixx="0.00000094" ixy="0.0" ixz="0.0" iyy="0.0000011" iyz="0.0" izz="0.00000053"/>
+      <inertia ixx="0.00000094" ixy="0.0" ixz="0.0" iyy="0.000011" iyz="0.0" izz="0.00000053"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -1296,26 +1296,6 @@
     <limit effort="2" lower="-0.3490658503988659" upper="0.3490658503988659" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
-  <link name="rh_lfknuckle">
-    <inertial>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <mass value="0.008"/>
-      <inertia ixx="0.00000026" ixy="0.0" ixz="0.0" iyy="0.00000026" iyz="0.0" izz="0.00000032"/>
-    </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0.0005"/>
-      <geometry>
-        <mesh filename="C:/Projects/RevExBot/RevEx_Phase1_Hardware/mechanical/meshes/rh_f_knuckle_E3M5.stl"/>
-      </geometry>
-      <material name="LightGrey"/>
-    </visual>
-    <collision>
-      <origin rpy="0 1.5708 0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.014" radius="0.007"/>
-      </geometry>
-    </collision>
-  </link>
   <link name="rh_lfproximal">
     <inertial>
       <mass value="0.030"/>
@@ -1786,7 +1766,7 @@
     <parent link="lh_palm"/>
     <child link="lh_ffknuckle"/>
     <origin rpy="0 0 0" xyz="-0.033 0 0.095"/>
-    <axis xyz="0 -1 0"/>
+    <axis xyz="0 1 0"/>
     <limit effort="2" lower="-0.3490658503988659" upper="0.3490658503988659" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
@@ -1862,7 +1842,7 @@
     <inertial>
       <mass value="0.012"/>
       <origin xyz="0 0 0.012"/>
-      <inertia ixx="0.00000094" ixy="0.0" ixz="0.0" iyy="0.0000011" iyz="0.0" izz="0.00000053"/>
+      <inertia ixx="0.00000094" ixy="0.0" ixz="0.0" iyy="0.000011" iyz="0.0" izz="0.00000053"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -1920,7 +1900,7 @@
     <parent link="lh_palm"/>
     <child link="lh_mfknuckle"/>
     <origin rpy="0 0 0" xyz="-0.011 0 0.099"/>
-    <axis xyz="0 -1 0"/>
+    <axis xyz="0 1 0"/>
     <limit effort="2" lower="-0.3490658503988659" upper="0.3490658503988659" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
@@ -2054,7 +2034,7 @@
     <parent link="lh_palm"/>
     <child link="lh_rfknuckle"/>
     <origin rpy="0 0 0" xyz="0.011 0 0.095"/>
-    <axis xyz="0 1 0"/>
+    <axis xyz="0 -1 0"/>
     <limit effort="2" lower="-0.3490658503988659" upper="0.3490658503988659" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
@@ -2188,7 +2168,7 @@
     <parent link="lh_palm"/>
     <child link="lh_lfmetacarpal"/>
     <origin rpy="0 0.9599 0" xyz="0.033 0 0.02071"/>
-    <axis xyz="1 0 0"/>
+    <axis xyz="-1 0 0"/>
     <limit effort="2" lower="0" upper="0.7853981633974483" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
@@ -2216,30 +2196,10 @@
     <parent link="lh_lfmetacarpal"/>
     <child link="lh_lfknuckle"/>
     <origin rpy="0 -0.9599 0" xyz="-0.05397275 0 0.03779463"/>
-    <axis xyz="0 1 0"/>
+    <axis xyz="0 -1 0"/>
     <limit effort="2" lower="-0.3490658503988659" upper="0.3490658503988659" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
-  <link name="lh_lfknuckle">
-    <inertial>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <mass value="0.008"/>
-      <inertia ixx="0.00000026" ixy="0.0" ixz="0.0" iyy="0.00000026" iyz="0.0" izz="0.00000032"/>
-    </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0.0005"/>
-      <geometry>
-        <mesh filename="C:/Projects/RevExBot/RevEx_Phase1_Hardware/mechanical/meshes/lh_f_knuckle_E3M5.stl"/>
-      </geometry>
-      <material name="LightGrey"/>
-    </visual>
-    <collision>
-      <origin rpy="0 1.5708 0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.014" radius="0.007"/>
-      </geometry>
-    </collision>
-  </link>
   <link name="lh_lfproximal">
     <inertial>
       <mass value="0.030"/>
@@ -2464,7 +2424,7 @@
       </geometry>
     </collision>
     <collision>
-      <origin rpy="0 1.5708 0" xyz="0 0 0.032"/>
+      <origin rpy="0 -1.5708 0" xyz="0 0 0.032"/>
       <geometry>
         <cylinder length="0.014" radius="0.010"/>
       </geometry>
