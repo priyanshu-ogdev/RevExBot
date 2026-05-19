@@ -1,44 +1,74 @@
 import os
-import subprocess
-import sys
+import xml.etree.ElementTree as ET
 
-def compile_robot():
-    print("==================================================")
-    print(" RevEx Hardware Builder: Compiling Master Assembly")
-    print("==================================================")
+# Set your directories
+URDF_DIR = "C:/Projects/RevExBot/RevEx_Phase1_Hardware/mechanical/urdf"
+MESH_DIR = "C:/Projects/RevExBot/RevEx_Phase1_Hardware/mechanical/meshes"
+
+# The Xacro files to parse
+XACRO_FILES = [
+    os.path.join(URDF_DIR, "master_assembly.xacro"),
+    os.path.join(URDF_DIR, "shadow_hand.xacro")
+]
+
+def get_used_meshes(xacro_files):
+    used_meshes = set()
+    for file in xacro_files:
+        if not os.path.exists(file):
+            print(f"Warning: Could not find {file}")
+            continue
+            
+        tree = ET.parse(file)
+        root = tree.getroot()
+        
+        # Find all mesh tags and extract the filename
+        for mesh in root.iter('mesh'):
+            filename = mesh.get('filename')
+            if filename:
+                base_name = os.path.basename(filename).lower()
+                
+                # --- THE FIX: Unpack Xacro Variables ---
+                if "${prefix}" in base_name:
+                    used_meshes.add(base_name.replace("${prefix}", "rh_"))
+                    used_meshes.add(base_name.replace("${prefix}", "lh_"))
+                else:
+                    used_meshes.add(base_name)
+                    
+    return used_meshes
+
+def clean_mesh_directory():
+    print("Parsing Xacro files for active meshes...")
+    used_meshes = get_used_meshes(XACRO_FILES)
     
-    # Define your files
-    input_xacro = "master_assembly.xacro"
-    output_urdf = "revexbot.urdf"
+    if not used_meshes:
+        print("Error: No meshes found in Xacro files. Aborting to prevent mass deletion.")
+        return
 
-    # Verify the master file exists before attempting to build
-    if not os.path.exists(input_xacro):
-        print(f"[ERROR] Could not find '{input_xacro}' in the current directory.")
-        sys.exit(1)
+    print(f"Found {len(used_meshes)} unique meshes active in the URDF.")
+    
+    # --- THE FIX: Native OS listing prevents double-counting on Windows ---
+    to_delete = []
+    if os.path.exists(MESH_DIR):
+        for file_name in os.listdir(MESH_DIR):
+            if file_name.lower().endswith(('.stl', '.dae')):
+                if file_name.lower() not in used_meshes:
+                    to_delete.append(os.path.join(MESH_DIR, file_name))
 
-    # Construct the cross-platform xacro command
-    # This command reads the xacro, processes the math/macros, and outputs pure XML
-    command = ["xacro", input_xacro, "-o", output_urdf]
+    if not to_delete:
+        print("Mesh directory is already clean. No unused files found.")
+        return
 
-    try:
-        print(f"-> Processing {input_xacro}...")
-        
-        # Run the command
-        result = subprocess.run(command, check=True, capture_output=True, text=True)
-        
-        print(f"-> Success! Robot compiled perfectly.")
-        print(f"-> Output saved to: {os.path.abspath(output_urdf)}")
-        print("==================================================")
-        
-    except FileNotFoundError:
-        print("[ERROR] 'xacro' is not installed or not in your system PATH.")
-        print("Run: pip install xacro (or install via ROS)")
-        sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print(f"[ERROR] The xacro compiler found a syntax error in your XML.")
-        print("Details:")
-        print(e.stderr)
-        sys.exit(1)
+    print("\nThe following unused files will be DELETED:")
+    for f in sorted(to_delete):
+        print(f"  - {os.path.basename(f)}")
+
+    confirm = input("\nType 'DELETE' to confirm: ")
+    if confirm == 'DELETE':
+        for f in to_delete:
+            os.remove(f)
+        print("Cleanup complete.")
+    else:
+        print("Operation cancelled.")
 
 if __name__ == "__main__":
-    compile_robot()
+    clean_mesh_directory()

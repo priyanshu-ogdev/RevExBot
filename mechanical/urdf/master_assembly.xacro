@@ -3,11 +3,6 @@
 
   <xacro:property name="mesh_dir" value="C:/Projects/RevExBot/RevEx_Phase1_Hardware/mechanical/meshes" />
 
-  <xacro:property name="leg_scale" value="1.5" />
-  <xacro:property name="leg_inertia_scale" value="${leg_scale * leg_scale}" />
-  <xacro:property name="effort_scale" value="${leg_scale}" />
-  <xacro:property name="pelvis_raise" value="0.24515" />
-
   <material name="Grey"><color rgba="0.6 0.6 0.6 1.0" /></material>
   <material name="DarkGrey"><color rgba="0.22 0.22 0.22 1.0" /></material>
   <material name="LightGrey"><color rgba="0.8 0.8 0.8 1.0" /></material>
@@ -16,7 +11,7 @@
   <joint name="base_joint" type="fixed">
     <parent link="base_link" />
     <child link="pelvis_link" />
-    <origin xyz="0 0 ${pelvis_raise}" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
   </joint>
 
   <link name="pelvis_link">
@@ -54,8 +49,8 @@
     <origin xyz="-0.052 0.0675 -0.044045" rpy="0 0 0" />
     <parent link="pelvis_link" /><child link="left_hip_pitch_link" />
     <axis xyz="0 1 0" />
-    <limit lower="-2.094" upper="1.047" effort="${120 * effort_scale}" velocity="8" />
-    <dynamics damping="0.095625" friction="0" />
+    <limit lower="-2.094" upper="1.047" effort="120" velocity="8" />
+    <dynamics damping="0.095625" friction="0.15" />
   </joint>
 
   <link name="left_hip_roll_link">
@@ -71,50 +66,50 @@
     <origin xyz="0.0422501 0.0400002759400924 0" rpy="0 0 0" />
     <parent link="left_hip_pitch_link" /><child link="left_hip_roll_link" />
     <axis xyz="1 0 0" />
-    <limit lower="-0.698" upper="0.698" effort="${100 * effort_scale}" velocity="8" />
-    <dynamics damping="0.11" friction="0" />
+    <limit lower="-0.698" upper="0.698" effort="100" velocity="8" />
+    <dynamics damping="0.11" friction="0.15" />
   </joint>
 
   <link name="left_hip_yaw_link">
     <inertial>
-      <origin xyz="0.00107948196019631 0.00102490074879569 ${-0.120338859084698 * leg_scale}" rpy="0 0 0" />
-      <mass value="${1.86657016436158 * leg_scale}" />
-      <inertia ixx="${0.00341632805787578 * leg_inertia_scale}" ixy="1.12872344062739E-05" ixz="2.89779048114687E-05"
-               iyy="${0.00356015908770306 * leg_inertia_scale}" iyz="-0.000119761895425219" izz="${0.00137524372110325 * leg_scale}" />
+      <origin xyz="0.00107948196019631 0.00102490074879569 -0.120338859084698" rpy="0 0 0" />
+      <mass value="1.86657016436158" />
+      <inertia ixx="0.00341632805787578" ixy="1.12872344062739E-05" ixz="2.89779048114687E-05"
+               iyy="0.00356015908770306" iyz="-0.000119761895425219" izz="0.00137524372110325" />
     </inertial>
-    <visual><geometry><mesh filename="${mesh_dir}/LEFT_HIP_YAW.STL" scale="1 1 ${leg_scale}"/></geometry><material name="Grey" /></visual>
+    <visual><geometry><mesh filename="${mesh_dir}/LEFT_HIP_YAW.STL" /></geometry><material name="Grey" /></visual>
     <collision name="left_hip_yaw_collision">
-      <origin xyz="0 0 ${-0.085 * leg_scale}" rpy="0 0 0" />
-      <geometry><cylinder radius="0.04" length="${0.07 * leg_scale}" /></geometry>
+      <origin xyz="0 0 -0.085" rpy="0 0 0" />
+      <geometry><cylinder radius="0.04" length="0.07" /></geometry>
     </collision>
   </link>
   <joint name="left_hip_yaw_joint" type="revolute">
     <origin xyz="-0.0422499999999954 0 -0.0520000000000006" rpy="0 0 0" />
     <parent link="left_hip_roll_link" /><child link="left_hip_yaw_link" />
     <axis xyz="0 0 -1" />
-    <limit lower="-0.698" upper="0.698" effort="${80 * effort_scale}" velocity="8" />
-    <dynamics damping="0.038" friction="0" />
+    <limit lower="-0.698" upper="0.698" effort="80" velocity="8" />
+    <dynamics damping="0.038" friction="0.15" />
   </joint>
 
   <link name="left_knee_link">
     <inertial>
-      <origin xyz="-0.000500664455004187 0.000509289489479564 ${-0.11269288769412 * leg_scale}" rpy="0 0 0" />
-      <mass value="${2.39114151033076 * leg_scale}" />
-      <inertia ixx="${0.00962172060189828 * leg_inertia_scale}" ixy="9.87646392241852E-06" ixz="-0.000645140055016828"
-               iyy="${0.00975314356560942 * leg_inertia_scale}" iyz="-7.94058135611557E-06" izz="${0.00233095236940007 * leg_scale}" />
+      <origin xyz="-0.000500664455004187 0.000509289489479564 -0.11269288769412" rpy="0 0 0" />
+      <mass value="2.39114151033076" />
+      <inertia ixx="0.00962172060189828" ixy="9.87646392241852E-06" ixz="-0.000645140055016828"
+               iyy="0.00975314356560942" iyz="-7.94058135611557E-06" izz="0.00233095236940007" />
     </inertial>
-    <visual><geometry><mesh filename="${mesh_dir}/LEFT_KNEE.STL" scale="1 1 ${leg_scale}"/></geometry><material name="Grey" /></visual>
+    <visual><geometry><mesh filename="${mesh_dir}/LEFT_KNEE.STL" /></geometry><material name="Grey" /></visual>
     <collision name="left_knee_collision">
-      <origin xyz="0 0 ${-0.13 * leg_scale}" rpy="0 0 0" />
-      <geometry><cylinder radius="0.04" length="${0.18 * leg_scale}" /></geometry>
+      <origin xyz="0 0 -0.13" rpy="0 0 0" />
+      <geometry><cylinder radius="0.04" length="0.18" /></geometry>
     </collision>
   </link>
   <joint name="left_knee_joint" type="revolute">
-    <origin xyz="0 0 ${-0.195639999999998 * leg_scale}" rpy="0 0 0" />
+    <origin xyz="0 0 -0.195639999999998" rpy="0 0 0" />
     <parent link="left_hip_yaw_link" /><child link="left_knee_link" />
     <axis xyz="0 1 0" />
-    <limit lower="0" upper="1.5" effort="${150 * effort_scale}" velocity="8" />
-    <dynamics damping="0.0339552" friction="0" />
+    <limit lower="0" upper="1.5" effort="150" velocity="8" />
+    <dynamics damping="0.0339552" friction="0.15" />
   </joint>
 
   <link name="left_ankle_pitch_link">
@@ -127,11 +122,11 @@
     <visual><geometry><mesh filename="${mesh_dir}/LEFT_ANKLE_A.STL" /></geometry><material name="Grey" /></visual>
   </link>
   <joint name="left_ankle_pitch_joint" type="revolute">
-    <origin xyz="0 0 ${-0.294662336087024 * leg_scale}" rpy="0 0 0" />
+    <origin xyz="0 0 -0.294662336087024" rpy="0 0 0" />
     <parent link="left_knee_link" /><child link="left_ankle_pitch_link" />
     <axis xyz="0 1 0" />
-    <limit lower="-0.35" upper="0.35" effort="${80 * effort_scale}" velocity="8" />
-    <dynamics damping="0.0565056" friction="0" />
+    <limit lower="-0.35" upper="0.35" effort="80" velocity="8" />
+    <dynamics damping="0.0565056" friction="0.15" />
   </joint>
 
   <link name="left_ankle_roll_link">
@@ -147,8 +142,8 @@
     <origin xyz="-0.00149999999999975 0 -0.00999999200000223" rpy="0 0 0" />
     <parent link="left_ankle_pitch_link" /><child link="left_ankle_roll_link" />
     <axis xyz="-1 0 0" />
-    <limit lower="-0.1" upper="0.1" effort="${50 * effort_scale}" velocity="8" />
-    <dynamics damping="0.0565056" friction="0" />
+    <limit lower="-0.1" upper="0.1" effort="50" velocity="8" />
+    <dynamics damping="0.0565056" friction="0.15" />
   </joint>
 
   <link name="left_toe_link">
@@ -167,7 +162,7 @@
     <origin xyz="0.10253 -0.0043664 -0.0067324" rpy="0 0 0" />
     <parent link="left_ankle_roll_link" /><child link="left_toe_link" />
     <axis xyz="0.010532 0.99994 0" />
-    <limit lower="-1.047" upper="0.349" effort="${30 * effort_scale}" velocity="8" />
+    <limit lower="-1.047" upper="0.349" effort="30" velocity="8" />
     <dynamics damping="0.001" friction="0.02" />
   </joint>
 
@@ -188,8 +183,8 @@
     <origin xyz="-0.0519999999999999 -0.0675 -0.0440449999999999" rpy="0 0 0" />
     <parent link="pelvis_link" /><child link="right_hip_pitch_link" />
     <axis xyz="0 -1 0" />
-    <limit lower="-1.047" upper="2.094" effort="${120 * effort_scale}" velocity="8" />
-    <dynamics damping="0.095625" friction="0" />
+    <limit lower="-1.047" upper="2.094" effort="120" velocity="8" />
+    <dynamics damping="0.095625" friction="0.15" />
   </joint>
 
   <link name="right_hip_roll_link">
@@ -205,50 +200,50 @@
     <origin xyz="0.04225 -0.04 0" rpy="0 0 0" />
     <parent link="right_hip_pitch_link" /><child link="right_hip_roll_link" />
     <axis xyz="1 0 0" />
-    <limit lower="-0.698" upper="0.698" effort="${100 * effort_scale}" velocity="8" />
-    <dynamics damping="0.11" friction="0" />
+    <limit lower="-0.698" upper="0.698" effort="100" velocity="8" />
+    <dynamics damping="0.11" friction="0.15" />
   </joint>
 
   <link name="right_hip_yaw_link">
     <inertial>
-      <origin xyz="0.0010759524804974 -0.00102176499629938 ${-0.120345116027848 * leg_scale}" rpy="0 0 0" />
-      <mass value="${1.86647220449567 * leg_scale}" />
-      <inertia ixx="${0.00341588734528233 * leg_inertia_scale}" ixy="-1.17597783272228E-05" ixz="2.91733595327906E-05"
-               iyy="${0.00355990015451682 * leg_inertia_scale}" iyz="0.00011971567133214" izz="${0.00137525272174267 * leg_scale}" />
+      <origin xyz="0.0010759524804974 -0.00102176499629938 -0.120345116027848" rpy="0 0 0" />
+      <mass value="1.86647220449567" />
+      <inertia ixx="0.00341588734528233" ixy="-1.17597783272228E-05" ixz="2.91733595327906E-05"
+               iyy="0.00355990015451682" iyz="0.00011971567133214" izz="0.00137525272174267" />
     </inertial>
-    <visual><geometry><mesh filename="${mesh_dir}/RIGHT_HIP_YAW.STL" scale="1 1 ${leg_scale}"/></geometry><material name="Grey" /></visual>
+    <visual><geometry><mesh filename="${mesh_dir}/RIGHT_HIP_YAW.STL" /></geometry><material name="Grey" /></visual>
     <collision name="right_hip_yaw_collision">
-      <origin xyz="0 0 ${-0.085 * leg_scale}" rpy="0 0 0" />
-      <geometry><cylinder radius="0.04" length="${0.07 * leg_scale}" /></geometry>
+      <origin xyz="0 0 -0.085" rpy="0 0 0" />
+      <geometry><cylinder radius="0.04" length="0.07" /></geometry>
     </collision>
   </link>
   <joint name="right_hip_yaw_joint" type="revolute">
     <origin xyz="-0.0422499999999986 0 -0.0520000000000019" rpy="0 0 0" />
     <parent link="right_hip_roll_link" /><child link="right_hip_yaw_link" />
     <axis xyz="0 0 -1" />
-    <limit lower="-0.698" upper="0.698" effort="${80 * effort_scale}" velocity="8" />
-    <dynamics damping="0.038" friction="0" />
+    <limit lower="-0.698" upper="0.698" effort="80" velocity="8" />
+    <dynamics damping="0.038" friction="0.15" />
   </joint>
 
   <link name="right_knee_link">
     <inertial>
-      <origin xyz="-0.000497587233719177 -0.000414757224949908 ${-0.112692693562372 * leg_scale}" rpy="0 0 0" />
-      <mass value="${2.39110172735043 * leg_scale}" />
-      <inertia ixx="${0.00962148213806552 * leg_inertia_scale}" ixy="-9.87527823922245E-06" ixz="-0.00064509471825313"
-               iyy="${0.00975287238047396 * leg_inertia_scale}" iyz="7.98431367388265E-06" izz="${0.0023309035826248 * leg_scale}" />
+      <origin xyz="-0.000497587233719177 -0.000414757224949908 -0.112692693562372" rpy="0 0 0" />
+      <mass value="2.39110172735043" />
+      <inertia ixx="0.00962148213806552" ixy="-9.87527823922245E-06" ixz="-0.00064509471825313"
+               iyy="0.00975287238047396" iyz="7.98431367388265E-06" izz="0.0023309035826248" />
     </inertial>
-    <visual><geometry><mesh filename="${mesh_dir}/RIGHT_KNEE.STL" scale="1 1 ${leg_scale}"/></geometry><material name="Grey" /></visual>
+    <visual><geometry><mesh filename="${mesh_dir}/RIGHT_KNEE.STL" /></geometry><material name="Grey" /></visual>
     <collision name="right_knee_collision">
-      <origin xyz="0 0 ${-0.13 * leg_scale}" rpy="0 0 0" />
-      <geometry><cylinder radius="0.04" length="${0.18 * leg_scale}" /></geometry>
+      <origin xyz="0 0 -0.13" rpy="0 0 0" />
+      <geometry><cylinder radius="0.04" length="0.18" /></geometry>
     </collision>
   </link>
   <joint name="right_knee_joint" type="revolute">
-    <origin xyz="0 0 ${-0.195639999999998 * leg_scale}" rpy="0 0 0" />
+    <origin xyz="0 0 -0.195639999999998" rpy="0 0 0" />
     <parent link="right_hip_yaw_link" /><child link="right_knee_link" />
     <axis xyz="0 -1 0" />
-    <limit lower="-1.5" upper="0" effort="${150 * effort_scale}" velocity="8" />
-    <dynamics damping="0.0339552" friction="0" />
+    <limit lower="-1.5" upper="0" effort="150" velocity="8" />
+    <dynamics damping="0.0339552" friction="0.15" />
   </joint>
 
   <link name="right_ankle_pitch_link">
@@ -261,11 +256,11 @@
     <visual><geometry><mesh filename="${mesh_dir}/RIGHT_ANKLE_A.STL" /></geometry><material name="Grey" /></visual>
   </link>
   <joint name="right_ankle_pitch_joint" type="revolute">
-    <origin xyz="0 0.0001 ${-0.294662336087023 * leg_scale}" rpy="0 0 0" />
+    <origin xyz="0 0.0001 -0.294662336087023" rpy="0 0 0" />
     <parent link="right_knee_link" /><child link="right_ankle_pitch_link" />
     <axis xyz="0 -1 0" />
-    <limit lower="-0.35" upper="0.35" effort="${80 * effort_scale}" velocity="8" />
-    <dynamics damping="0.0565056" friction="0" />
+    <limit lower="-0.35" upper="0.35" effort="80" velocity="8" />
+    <dynamics damping="0.0565056" friction="0.15" />
   </joint>
 
   <link name="right_ankle_roll_link">
@@ -281,8 +276,8 @@
     <origin xyz="-0.0015 0 -0.00999999200000001" rpy="0 0 0" />
     <parent link="right_ankle_pitch_link" /><child link="right_ankle_roll_link" />
     <axis xyz="-1 0 0" />
-    <limit lower="-0.1" upper="0.1" effort="${50 * effort_scale}" velocity="8" />
-    <dynamics damping="0.0565056" friction="0" />
+    <limit lower="-0.1" upper="0.1" effort="50" velocity="8" />
+    <dynamics damping="0.0565056" friction="0.15" />
   </joint>
 
   <link name="right_toe_link">
@@ -301,7 +296,7 @@
     <origin xyz="0.10247 0.0042796 -0.0067324" rpy="0 0 0" />
     <parent link="right_ankle_roll_link" /><child link="right_toe_link" />
     <axis xyz="0.0074685 -0.99997 0" />
-    <limit lower="-0.349" upper="1.047" effort="${30 * effort_scale}" velocity="8" />
+    <limit lower="-0.349" upper="1.047" effort="30" velocity="8" />
     <dynamics damping="0.001" friction="0.02" />
   </joint>
 
@@ -323,7 +318,7 @@
     <parent link="pelvis_link" /><child link="waist_yaw_link" />
     <axis xyz="0 0 1" />
     <limit lower="-1.047" upper="1.047" effort="150" velocity="5" />
-    <dynamics damping="0.095625" friction="0" />
+    <dynamics damping="0.095625" friction="0.15" />
   </joint>
 
   <link name="neck_yaw_link">
@@ -345,7 +340,7 @@
     <child link="neck_yaw_link" />
     <axis xyz="0 0 1" />
     <limit lower="-1.571" upper="1.571" effort="20" velocity="5" />
-    <dynamics damping="0.0565" friction="0" />
+    <dynamics damping="0.0565" friction="0.08" />
   </joint>
 
   <link name="head_link">
@@ -356,7 +351,7 @@
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry><mesh filename="${mesh_dir}/HEAD.STL" /></geometry>
+      <geometry><mesh filename="${mesh_dir}/head.stl" /></geometry>
       <material name="LightGrey" />
     </visual>
     <collision>
@@ -371,7 +366,7 @@
     <child link="head_link" />
     <axis xyz="0 1 0" />
     <limit lower="-0.5" upper="0.5" effort="20" velocity="5" />
-    <dynamics damping="0.0565" friction="0" />
+    <dynamics damping="0.0565" friction="0.08" />
   </joint>
 
   <link name="left_eye_camera_link" />
@@ -418,8 +413,9 @@
     <parent link="waist_yaw_link" /><child link="right_shoulder_pitch_link" />
     <axis xyz="0 -1 0" />
     <limit lower="-0.872" upper="3.141" effort="80" velocity="6" />
-    <dynamics damping="0.11" friction="0" />
+    <dynamics damping="0.11" friction="0.08" />
   </joint>
+
   <link name="right_shoulder_roll_link">
     <inertial>
       <origin xyz="0.000114177624818339 -4.35142145794876E-05 -0.0373100689697469" rpy="0 0 0" />
@@ -439,7 +435,7 @@
     <child link="right_shoulder_roll_link" />
     <axis xyz="-1 0 0" />
     <limit lower="0" upper="1.571" effort="80" velocity="6" />
-    <dynamics damping="0.0339552" friction="0" />
+    <dynamics damping="0.0339552" friction="0.08" />
   </joint>
 
   <link name="right_shoulder_yaw_link">
@@ -456,7 +452,7 @@
     <parent link="right_shoulder_roll_link" /><child link="right_shoulder_yaw_link" />
     <axis xyz="0 0 -1" />
     <limit lower="-1.571" upper="1.571" effort="60" velocity="6" />
-    <dynamics damping="0.038" friction="0" />
+    <dynamics damping="0.038" friction="0.08" />
   </joint>
 
   <link name="right_elbow_link">
@@ -477,7 +473,7 @@
     <parent link="right_shoulder_yaw_link" /><child link="right_elbow_link" />
     <axis xyz="0 1 0" />
     <limit lower="-2.443" upper="0" effort="60" velocity="6" />
-    <dynamics damping="0.0282528" friction="0" />
+    <dynamics damping="0.0282528" friction="0.08" />
   </joint>
 
   <link name="left_shoulder_pitch_link">
@@ -494,7 +490,7 @@
     <parent link="waist_yaw_link" /><child link="left_shoulder_pitch_link" />
     <axis xyz="0 1 0" />
     <limit lower="-3.141" upper="0.872" effort="80" velocity="6" />
-    <dynamics damping="0.11" friction="0" />
+    <dynamics damping="0.11" friction="0.08" />
   </joint>
 
   <link name="left_shoulder_roll_link">
@@ -516,7 +512,7 @@
     <child link="left_shoulder_roll_link" />
     <axis xyz="-1 0 0" />
     <limit lower="-1.571" upper="0" effort="80" velocity="6" />
-    <dynamics damping="0.0339552" friction="0" />
+    <dynamics damping="0.0339552" friction="0.08" />
   </joint>
 
   <link name="left_shoulder_yaw_link">
@@ -533,7 +529,7 @@
     <parent link="left_shoulder_roll_link" /><child link="left_shoulder_yaw_link" />
     <axis xyz="0 0 -1" />
     <limit lower="-1.571" upper="1.571" effort="60" velocity="6" />
-    <dynamics damping="0.038" friction="0" />
+    <dynamics damping="0.038" friction="0.08" />
   </joint>
 
   <link name="left_elbow_link">
@@ -554,16 +550,18 @@
     <parent link="left_shoulder_yaw_link" /><child link="left_elbow_link" />
     <axis xyz="0 -1 0" />
     <limit lower="0" upper="2.443" effort="60" velocity="6" />
-    <dynamics damping="0.0282528" friction="0" />
+    <dynamics damping="0.0282528" friction="0.08" />
   </joint>
 
   <xacro:include filename="shadow_hand.xacro" />
-
-  <xacro:shadow_hand 
+<xacro:shadow_hand 
       prefix="rh_" 
       mesh_dir="${mesh_dir}"
-      forearm_visual_xyz="0.107504 0.162107 -0.113857" 
-      wrist_xyz="-0.013287 0 -0.248456" 
+      
+      forearm_visual_xyz="0.0 0.0 0.0" 
+
+      wrist_xyz="-0.013352 -0.000739 -0.189317"
+      
       wrist_rpy="3.14159 0.1396263 0" 
       mirror="false" />          
       
@@ -576,8 +574,11 @@
   <xacro:shadow_hand 
       prefix="lh_" 
       mesh_dir="${mesh_dir}"
-      forearm_visual_xyz="0.107504 -0.162107 -0.113857" 
-      wrist_xyz="-0.013287 0 -0.248456" 
+      
+      forearm_visual_xyz="0.0 0.0 0.0" 
+      
+      wrist_xyz="-0.013352 0.000739 -0.189317"
+      
       wrist_rpy="3.14159 -0.1396263 3.14159" 
       mirror="true" />          
       
@@ -586,5 +587,5 @@
     <child link="lh_forearm" />
     <origin xyz="0 0 0" rpy="0 -0.1396263 0" /> 
   </joint>
-  
+
 </robot>
