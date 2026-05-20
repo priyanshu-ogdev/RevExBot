@@ -9,11 +9,10 @@ import json
 import sys
 from pathlib import Path
 
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-CAD_ROOT = REPO_ROOT / "mechanical" / "RVX1"
-CSV_PATH = REPO_ROOT / "mechanical" / "FABRICATION_MANIFEST.csv"
-JSON_PATH = REPO_ROOT / "mechanical" / "FABRICATION_MANIFEST.json"
+REPO_ROOT = Path(__file__).resolve().parent[1]
+CAD_ROOT = REPO_ROOT / "RVX1"
+CSV_PATH = REPO_ROOT / "FABRICATION_MANIFEST.csv"
+JSON_PATH = REPO_ROOT / "FABRICATION_MANIFEST.json"
 FABRICATION_ORDER = {
     "ALU_7075": 0,
     "SML_316L": 1,

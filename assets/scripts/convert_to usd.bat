@@ -81,8 +81,8 @@ echo [INFO] Converter script: %CONVERTER_SCRIPT%
 :: ============================================================
 set SCRIPT_DIR=%~dp0
 set PROJECT_ROOT=%SCRIPT_DIR%..
-set URDF_FILE=%PROJECT_ROOT%\output\revexbot.urdf
-set USD_FILE=%PROJECT_ROOT%\output\revexbot.usd
+set URDF_FILE=%PROJECT_ROOT%\urdf\revexbot.urdf
+set USD_FILE=%PROJECT_ROOT%\usd\revexbot.usd
 
 echo [INFO] URDF: %URDF_FILE%
 echo [INFO] USD output: %USD_FILE%

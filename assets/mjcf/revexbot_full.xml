@@ -1,0 +1,612 @@
+<mujoco model="RevEx_Full_Assembly">
+  <compiler angle="radian" meshdir="../assets/meshes" autolimits="true"/>
+
+  <option timestep="0.005" iterations="4" ls_iterations="8" integrator="implicitfast" solver="Newton">
+    <flag sensornoise="disable" contact="enable"/>
+  </option>
+
+  <default>
+    <!-- Visual Geoms -->
+    <default class="visual">
+      <geom contype="0" conaffinity="0" group="2" rgba="0.7 0.7 0.7 1"/>
+    </default>
+
+    <!-- Collision Geoms -->
+    <default class="collision">
+      <geom group="3" rgba="0.5 0.5 0.5 0.3" type="capsule" contype="1" conaffinity="1"/>
+    </default>
+
+    <!-- Motor Joints (Legs, Arms, Waist) -->
+    <default class="motor">
+      <joint damping="0" armature="0.01" frictionloss="0"/>
+      <position kp="150" kv="5" forcerange="-100 100" ctrlrange="-3.14 3.14"/>
+    </default>
+
+    <!-- Passive Upper Body (Neck) -->
+    <default class="passive_upper">
+      <joint damping="15.0" stiffness="80.0" springref="0" armature="0.05"/>
+    </default>
+
+    <!-- Hand Joints (Faive Style) -->
+    <default class="hand_motor">
+      <joint damping="0.05" armature="0.001" frictionloss="0.001" margin="0.01"/>
+      <position kp="2.0" kv="0.1" forcerange="-1 1"/>
+    </default>
+  </default>
+
+  <asset>
+    <material name="visual_grey" rgba="0.7 0.7 0.7 1.0" />
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="512"/>
+    <texture name="texplane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" width="512" height="512"/>
+    <material name="groundplane" texture="texplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+
+    <!-- Humanoid Meshes -->
+    <mesh name="pelvis" file="IMU_ORIGIN.STL" />
+    <mesh name="left_hip_pitch" file="LEFT_HIP_PITCH.STL" />
+    <mesh name="left_hip_roll" file="LEFT_HIP_ROLL.STL" />
+    <mesh name="left_hip_yaw" file="LEFT_HIP_YAW.STL" />
+    <mesh name="left_knee" file="LEFT_KNEE.STL" />
+    <mesh name="left_ankle_a" file="LEFT_ANKLE_A.STL" />
+    <mesh name="left_ankle_b" file="LEFT_ANKLE_B.STL" />
+    <mesh name="left_toe" file="LEFT_TOE.STL" />
+    <mesh name="right_hip_pitch" file="RIGHT_HIP_PITCH.STL" />
+    <mesh name="right_hip_roll" file="RIGHT_HIP_ROLL.STL" />
+    <mesh name="right_hip_yaw" file="RIGHT_HIP_YAW.STL" />
+    <mesh name="right_knee" file="RIGHT_KNEE.STL" />
+    <mesh name="right_ankle_a" file="RIGHT_ANKLE_A.STL" />
+    <mesh name="right_ankle_b" file="RIGHT_ANKLE_B.STL" />
+    <mesh name="right_toe" file="RIGHT_TOE.STL" />
+    <mesh name="waist_yaw" file="WAIST_YAW.STL" />
+    <mesh name="neck_yaw" file="NECK_YAW.STL" />
+    <mesh name="neck_pitch" file="NECK_PITCH.STL" />
+    <mesh name="head" file="HEAD.STL" />
+    <mesh name="r_shoulder_pitch" file="RIGHT_SHOULDER_PITCH.STL" />
+    <mesh name="r_shoulder_roll" file="RIGHT_SHOULDER_ROLL.STL" />
+    <mesh name="r_shoulder_yaw" file="RIGHT_SHOULDER_YAW.STL" />
+    <mesh name="r_elbow" file="RIGHT_ELBOW.STL" />
+    <mesh name="r_wrist_yaw" file="RIGHT_WRIST_YAW.STL" />
+    <mesh name="l_shoulder_pitch" file="LEFT_SHOULDER_PITCH.STL" />
+    <mesh name="l_shoulder_roll" file="LEFT_SHOULDER_ROLL.STL" />
+    <mesh name="l_shoulder_yaw" file="LEFT_SHOULDER_YAW.STL" />
+    <mesh name="l_elbow" file="LEFT_ELBOW.STL" />
+    <mesh name="l_wrist_yaw" file="LEFT_WRIST_YAW.STL" />
+
+    <!-- Faive Hand Meshes (Right) -->
+    <mesh name="rh_palm" file="rh_palm.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_thumb_base" file="rh_thumb_base.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_thumb_pp" file="rh_thumb_pp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_thumb_mp" file="rh_thumb_mp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_thumb_dp" file="rh_thumb_dp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_index_pp" file="rh_index_pp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_index_mp" file="rh_index_mp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_index_dp" file="rh_index_dp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_middle_pp" file="rh_middle_pp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_middle_mp" file="rh_middle_mp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_middle_dp" file="rh_middle_dp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_ring_pp" file="rh_ring_pp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_ring_mp" file="rh_ring_mp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_ring_dp" file="rh_ring_dp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_pinky_pp" file="rh_pinky_pp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_pinky_mp" file="rh_pinky_mp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="rh_pinky_dp" file="rh_pinky_dp.stl" scale="0.001 0.001 0.001"/>
+
+    <!-- Faive Hand Meshes (Left - Mirrored) -->
+    <mesh name="lh_palm" file="lh_palm.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_thumb_base" file="lh_thumb_base.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_thumb_pp" file="lh_thumb_pp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_thumb_mp" file="lh_thumb_mp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_thumb_dp" file="lh_thumb_dp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_index_pp" file="lh_index_pp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_index_mp" file="lh_index_mp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_index_dp" file="lh_index_dp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_middle_pp" file="lh_middle_pp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_middle_mp" file="lh_middle_mp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_middle_dp" file="lh_middle_dp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_ring_pp" file="lh_ring_pp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_ring_mp" file="lh_ring_mp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_ring_dp" file="lh_ring_dp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_pinky_pp" file="lh_pinky_pp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_pinky_mp" file="lh_pinky_mp.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lh_pinky_dp" file="lh_pinky_dp.stl" scale="0.001 0.001 0.001"/>
+  </asset>
+
+  <worldbody>
+    <light pos="1 0 3.5" dir="0 0 -1" directional="true"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
+    <body name="pelvis_link" pos="0 0 0.63">
+      <freejoint name="floating_base"/>
+      <site name="imu_in_pelvis" size="0.01" pos="-0.05 0 0.08"/>
+      
+      <inertial pos="-0.054 -0.00003 -0.0156" mass="3.507" 
+        diaginertia="0.00552 0.00627 0.00505" />
+      
+      <geom name="pelvis_visual" type="mesh" mesh="pelvis" class="visual"/>
+      <geom name="pelvis_collision" class="collision" fromto="-0.04 0 0.025 -0.04 0 -0.05" size="0.04"/>
+
+      <!-- ==================== LEFT LEG ==================== -->
+      <body name="left_hip_pitch_link" pos="-0.052 0.0675 -0.044">
+        <joint name="left_hip_pitch_joint" type="hinge" axis="0 1 0" range="-2.094 1.0" class="motor"/>
+        <inertial pos="0.0017 0.036 0.0005" mass="1.056" diaginertia="0.00069 0.00081 0.00075"/>
+        <geom name="left_hip_pitch_visual" type="mesh" mesh="left_hip_pitch" class="visual"/>
+        <geom name="left_hip_pitch_collision" class="collision" fromto="0 0.02 0 0 0.04 0" size="0.04"/>
+        
+        <body name="left_hip_roll_link" pos="0.042 0.04 0">
+          <joint name="left_hip_roll_joint" type="hinge" axis="1 0 0" range="-0.785 0.785" class="motor"/>
+          <inertial pos="-0.011 -0.0003 -0.029" mass="0.414" diaginertia="0.00026 0.00035 0.00023"/>
+          <geom name="left_hip_roll_visual" type="mesh" mesh="left_hip_roll" class="visual"/>
+          
+          <body name="left_hip_yaw_link" pos="-0.042 0 -0.052">
+            <joint name="left_hip_yaw_joint" type="hinge" axis="0 0 -1" range="-0.785 0.785" class="motor"/>
+            <inertial pos="0.001 0.001 -0.120" mass="1.867" diaginertia="0.0034 0.0035 0.0013"/>
+            <geom name="left_hip_yaw_visual" type="mesh" mesh="left_hip_yaw" class="visual"/>
+            <geom name="left_hip_yaw_collision" class="collision" fromto="0 0 -0.05 0 0 -0.12" size="0.04"/>
+            
+            <body name="left_knee_link" pos="0 0 -0.196">
+              <joint name="left_knee_joint" type="hinge" axis="0 1 0" range="0 1.5" class="motor"/>
+              <inertial pos="-0.0005 0.0005 -0.113" mass="2.391" diaginertia="0.0096 0.0097 0.0023"/>
+              <geom name="left_knee_visual" type="mesh" mesh="left_knee" class="visual"/>
+              <geom name="left_knee_collision" class="collision" fromto="0 0 -0.04 0 0 -0.22" size="0.04"/>
+              
+              <body name="left_ankle_pitch_link" pos="0 0 -0.295">
+                <joint name="left_ankle_pitch_joint" type="hinge" axis="0 1 0" range="-0.35 0.35" class="motor"/>
+                <inertial pos="-0.001 0 -0.006" mass="0.273" diaginertia="6.4e-5 8.1e-5 4.7e-5"/>
+                <geom name="left_ankle_pitch_visual" type="mesh" mesh="left_ankle_a" class="visual"/>
+                
+                <body name="left_ankle_roll_link" pos="-0.0015 0 -0.01">
+                  <joint name="left_ankle_roll_joint" type="hinge" axis="-1 0 0" range="-0.1 0.1" class="motor"/>
+                  <inertial pos="0.043 0.0016 -0.013" mass="0.406" diaginertia="1.7e-4 4.1e-4 5.3e-4"/>
+                  <geom name="left_ankle_roll_visual" type="mesh" mesh="left_ankle_b" class="visual"/>
+                  <site name="left_foot_site" pos="0.04 0 -0.025"/>
+                  
+                  <!-- Foot Collisions -->
+                  <geom name="left_foot_col1" class="collision" fromto="0.06 -0.03 -0.022 0.09 -0.035 -0.022" size="0.01"/>
+                  <geom name="left_foot_col2" class="collision" fromto="-0.035 -0.015 -0.022 0.09 -0.015 -0.022" size="0.01"/>
+                  <geom name="left_foot_col3" class="collision" fromto="-0.035 0 -0.022 0.09 0 -0.022" size="0.01"/>
+                  <geom name="left_foot_col4" class="collision" fromto="-0.035 0.015 -0.022 0.09 0.015 -0.022" size="0.01"/>
+                  
+                  <body name="left_toe_link" pos="0.1025 -0.0044 -0.0067">
+                    <joint name="left_toe_joint" type="hinge" axis="0.01 1 0" range="-1.047 0" 
+                      stiffness="3.5" damping="0.5" armature="0.001" frictionloss="0.02" 
+                      solreflimit="0.005 1" solimplimit="0.99 0.999 0.001"/>
+                    <inertial pos="0.032 0.0007 -0.014" mass="0.112" diaginertia="5.5e-5 3.6e-5 8.5e-5"/>
+                    <geom name="left_toe_visual" type="mesh" mesh="left_toe" class="visual"/>
+                    <geom name="left_toe_col1" class="collision" fromto="0.01 -0.03 -0.018 0.04 -0.03 -0.018" size="0.005"/>
+                    <geom name="left_toe_col2" class="collision" fromto="0.01 0 -0.018 0.06 0 -0.018" size="0.005"/>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <!-- ==================== RIGHT LEG ==================== -->
+      <body name="right_hip_pitch_link" pos="-0.052 -0.0675 -0.044">
+        <joint name="right_hip_pitch_joint" type="hinge" axis="0 -1 0" range="-1.0 2.094" class="motor"/>
+        <inertial pos="0.0017 -0.036 0.0005" mass="1.056" diaginertia="0.00069 0.00081 0.00075"/>
+        <geom name="right_hip_pitch_visual" type="mesh" mesh="right_hip_pitch" class="visual"/>
+        <geom name="right_hip_pitch_collision" class="collision" fromto="0 -0.02 0 0 -0.04 0" size="0.04"/>
+        
+        <body name="right_hip_roll_link" pos="0.042 -0.04 0">
+          <joint name="right_hip_roll_joint" type="hinge" axis="1 0 0" range="-0.785 0.785" class="motor"/>
+          <inertial pos="-0.011 0.0003 -0.029" mass="0.415" diaginertia="0.00026 0.00035 0.00023"/>
+          <geom name="right_hip_roll_visual" type="mesh" mesh="right_hip_roll" class="visual"/>
+          
+          <body name="right_hip_yaw_link" pos="-0.042 0 -0.052">
+            <joint name="right_hip_yaw_joint" type="hinge" axis="0 0 -1" range="-0.785 0.785" class="motor"/>
+            <inertial pos="0.001 -0.001 -0.120" mass="1.866" diaginertia="0.0034 0.0035 0.0013"/>
+            <geom name="right_hip_yaw_visual" type="mesh" mesh="right_hip_yaw" class="visual"/>
+            <geom name="right_hip_yaw_collision" class="collision" fromto="0 0 -0.05 0 0 -0.12" size="0.04"/>
+            
+            <body name="right_knee_link" pos="0 0 -0.196">
+              <joint name="right_knee_joint" type="hinge" axis="0 -1 0" range="-1.5 0" class="motor"/>
+              <inertial pos="-0.0005 -0.0004 -0.113" mass="2.391" diaginertia="0.0096 0.0097 0.0023"/>
+              <geom name="right_knee_visual" type="mesh" mesh="right_knee" class="visual"/>
+              <geom name="right_knee_collision" class="collision" fromto="0 0 -0.04 0 0 -0.22" size="0.04"/>
+              
+              <body name="right_ankle_pitch_link" pos="0 0 -0.295">
+                <joint name="right_ankle_pitch_joint" type="hinge" axis="0 -1 0" range="-0.35 0.35" class="motor"/>
+                <inertial pos="-0.001 0 -0.006" mass="0.273" diaginertia="6.4e-5 8.1e-5 4.7e-5"/>
+                <geom name="right_ankle_pitch_visual" type="mesh" mesh="right_ankle_a" class="visual"/>
+                
+                <body name="right_ankle_roll_link" pos="-0.0015 0 -0.01">
+                  <joint name="right_ankle_roll_joint" type="hinge" axis="-1 0 0" range="-0.1 0.1" class="motor"/>
+                  <inertial pos="0.038 -0.001 -0.012" mass="0.406" diaginertia="1.8e-4 4.1e-4 5.3e-4"/>
+                  <geom name="right_ankle_roll_visual" type="mesh" mesh="right_ankle_b" class="visual"/>
+                  <site name="right_foot_site" pos="0.04 0 -0.025"/>
+                  
+                  <geom name="right_foot_col1" class="collision" fromto="0.0 -0.03 -0.022 0.09 -0.035 -0.022" size="0.01"/>
+                  <geom name="right_foot_col2" class="collision" fromto="-0.035 -0.015 -0.022 0.09 -0.015 -0.022" size="0.01"/>
+                  <geom name="right_foot_col3" class="collision" fromto="-0.035 0 -0.022 0.09 0 -0.022" size="0.01"/>
+                  <geom name="right_foot_col4" class="collision" fromto="-0.035 0.015 -0.022 0.09 0.015 -0.022" size="0.01"/>
+                  
+                  <body name="right_toe_link" pos="0.1025 0.0043 -0.0067">
+                    <joint name="right_toe_joint" type="hinge" axis="0.007 -1 0" range="0 1.047" 
+                      stiffness="3.5" damping="0.5" armature="0.001" frictionloss="0.02" 
+                      solreflimit="0.005 1" solimplimit="0.99 0.999 0.001"/>
+                    <inertial pos="0.032 -0.0008 -0.014" mass="0.112" diaginertia="5.5e-5 3.6e-5 8.5e-5"/>
+                    <geom name="right_toe_visual" type="mesh" mesh="right_toe" class="visual"/>
+                    <geom name="right_toe_col1" class="collision" fromto="0.01 -0.03 -0.018 0.04 -0.03 -0.018" size="0.005"/>
+                    <geom name="right_toe_col2" class="collision" fromto="0.01 0 -0.018 0.06 0 -0.018" size="0.005"/>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <!-- ==================== UPPER BODY ==================== -->
+      <body name="waist_yaw_link" pos="-0.052 0 0.075">
+        <joint name="waist_yaw_joint" type="hinge" axis="0 0 1" range="-1.57 1.57" class="motor"/>
+        <inertial pos="-0.007 0 0.204" mass="8.209" diaginertia="0.0498 0.0397 0.0321"/>
+        <geom name="waist_visual" type="mesh" mesh="waist_yaw" class="visual"/>
+        <geom name="waist_collision" class="collision" fromto="0 0 0.05 0 0 0.30" size="0.06"/>
+
+        <!-- Neck & Head -->
+        <body name="neck_yaw_link" pos="-0.017 0 0.378">
+          <joint name="neck_yaw_joint" type="hinge" axis="0 0 1" range="-1.57 1.57" class="passive_upper"/>
+          <geom name="neck_yaw_visual" type="mesh" mesh="neck_yaw" class="visual"/>
+          <body name="neck_pitch_link" pos="0 0 0.037">
+            <joint name="neck_pitch_joint" type="hinge" axis="0 1 0" range="-0.785 0.785" class="passive_upper"/>
+            <geom name="neck_pitch_visual" type="mesh" mesh="neck_pitch" class="visual"/>
+            <geom name="head_visual" type="mesh" mesh="head" class="visual" pos="0 0 0.05"/>
+          </body>
+        </body>
+
+        <!-- ==================== RIGHT ARM ==================== -->
+        <body name="right_shoulder_pitch_link" pos="-0.026 -0.096 0.261">
+          <joint name="right_shoulder_pitch_joint" type="hinge" axis="0 -1 0" range="-0.872 3.141" class="motor"/>
+          <geom name="r_sp_visual" type="mesh" mesh="r_shoulder_pitch" class="visual"/>
+          <body name="right_shoulder_roll_link" pos="0 -0.065 0">
+            <joint name="right_shoulder_roll_joint" type="hinge" axis="-1 0 0" range="0 1.57" class="motor"/>
+            <geom name="r_sr_visual" type="mesh" mesh="r_shoulder_roll" class="visual"/>
+            <geom name="r_sr_collision" class="collision" fromto="0 -0.01 -0.02 0 -0.01 -0.11" size="0.035"/>
+            <body name="right_shoulder_yaw_link" pos="0 0 -0.129">
+              <joint name="right_shoulder_yaw_joint" type="hinge" axis="0 0 -1" range="-1.57 1.57" class="motor"/>
+              <geom name="r_sy_visual" type="mesh" mesh="r_shoulder_yaw" class="visual"/>
+              <body name="right_elbow_link" pos="0 0 -0.097">
+                <joint name="right_elbow_joint" type="hinge" axis="0 1 0" range="-2.443 0" class="motor"/>
+                <geom name="r_elbow_visual" type="mesh" mesh="r_elbow" class="visual"/>
+                <geom name="r_elbow_collision" class="collision" fromto="0 -0.01 0 0.09 -0.01 -0.07" size="0.03"/>
+                <body name="right_wrist_yaw_link" pos="0.087 0 -0.073">
+                  <joint name="right_wrist_yaw_joint" type="hinge" axis="0.766 0 -0.643" range="-3.141 3.141" class="motor"/>
+                  <geom name="r_wrist_visual" type="mesh" mesh="r_wrist_yaw" class="visual"/>
+                  
+                  <!-- RIGHT HAND ATTACHMENT -->
+                  <body name="rh_palm" pos="-0.035 -0.0002 0.032" quat="0.3827 0.9239 0 0"> <!-- Approx RPY 0.785, 3.14, -1.57 -->
+                     <geom name="rh_palm_visual" type="mesh" mesh="rh_palm" class="visual"/>
+                     <geom name="rh_palm_collision" type="box" size="0.03 0.04 0.02" pos="-0.015 0.03 0"/>
+                     
+                     <!-- Right Thumb -->
+                     <body name="rh_thumb_base" pos="0.029 -0.062 -0.006">
+                        <joint name="rh_thumb_base_joint" axis="0.3 -0.7 -0.65" range="0 2.27" class="hand_motor"/>
+                        <geom name="rh_tb_visual" type="mesh" mesh="rh_thumb_base" class="visual"/>
+                        <body name="rh_thumb_pp" pos="-0.044 0.059 -0.010">
+                           <joint name="rh_thumb_pp_joint" axis="-0.09 -0.7 0.71" range="-1.66 1.05" class="hand_motor"/>
+                           <geom name="rh_tp_visual" type="mesh" mesh="rh_thumb_pp" class="visual"/>
+                           <body name="rh_thumb_mp" pos="-0.047 0.045 -0.018">
+                              <joint name="rh_thumb_mp_joint" axis="0.28 -0.09 -0.95" range="0 0.96" class="hand_motor"/>
+                              <geom name="rh_tm_visual" type="mesh" mesh="rh_thumb_mp" class="visual"/>
+                              <body name="rh_thumb_dp" pos="-0.034 0.006 -0.010">
+                                 <joint name="rh_thumb_dp_joint" axis="0.28 -0.09 -0.95" range="0 0.68" class="hand_motor"/>
+                                 <geom name="rh_td_visual" type="mesh" mesh="rh_thumb_dp" class="visual"/>
+                              </body>
+                           </body>
+                        </body>
+                     </body>
+
+                     <!-- Right Index -->
+                     <body name="rh_index_pp" pos="-0.031 0.133 0.020">
+                        <joint name="rh_index_pp_joint" axis="-0.99 -0.1 -0.09" range="0 0.83" class="hand_motor"/>
+                        <geom name="rh_ip_visual" type="mesh" mesh="rh_index_pp" class="visual"/>
+                        <body name="rh_index_mp" pos="-0.005 0.042 0.005">
+                           <joint name="rh_index_mp_joint" axis="-0.99 -0.1 -0.09" range="0 0.96" class="hand_motor"/>
+                           <geom name="rh_im_visual" type="mesh" mesh="rh_index_mp" class="visual"/>
+                           <body name="rh_index_dp" pos="-0.004 0.032 0.004">
+                              <joint name="rh_index_dp_joint" axis="-0.99 -0.1 -0.09" range="0 0.68" class="hand_motor"/>
+                              <geom name="rh_id_visual" type="mesh" mesh="rh_index_dp" class="visual"/>
+                           </body>
+                        </body>
+                     </body>
+                     
+                     <!-- Right Middle -->
+                     <body name="rh_middle_pp" pos="-0.006 0.135 0.022">
+                        <joint name="rh_middle_pp_joint" axis="-1 0 0" range="0 0.83" class="hand_motor"/>
+                        <geom name="rh_mp_visual" type="mesh" mesh="rh_middle_pp" class="visual"/>
+                        <body name="rh_middle_mp" pos="0 0.047 0.006">
+                           <joint name="rh_middle_mp_joint" axis="-1 0 0" range="0 0.96" class="hand_motor"/>
+                           <geom name="rh_mm_visual" type="mesh" mesh="rh_middle_mp" class="visual"/>
+                           <body name="rh_middle_dp" pos="0 0.034 0.004">
+                              <joint name="rh_middle_dp_joint" axis="-1 0 0" range="0 0.68" class="hand_motor"/>
+                              <geom name="rh_md_visual" type="mesh" mesh="rh_middle_dp" class="visual"/>
+                           </body>
+                        </body>
+                     </body>
+
+                     <!-- Right Ring -->
+                     <body name="rh_ring_pp" pos="0.020 0.130 0.020">
+                        <joint name="rh_ring_pp_joint" axis="-0.99 0.1 0.09" range="0 0.83" class="hand_motor"/>
+                        <geom name="rh_rp_visual" type="mesh" mesh="rh_ring_pp" class="visual"/>
+                        <body name="rh_ring_mp" pos="0.005 0.042 0.005">
+                           <joint name="rh_ring_mp_joint" axis="-0.99 0.1 0.09" range="0 0.96" class="hand_motor"/>
+                           <geom name="rh_rm_visual" type="mesh" mesh="rh_ring_mp" class="visual"/>
+                           <body name="rh_ring_dp" pos="0.004 0.032 0.004">
+                              <joint name="rh_ring_dp_joint" axis="-0.99 0.1 0.09" range="0 0.68" class="hand_motor"/>
+                              <geom name="rh_rd_visual" type="mesh" mesh="rh_ring_dp" class="visual"/>
+                           </body>
+                        </body>
+                     </body>
+
+                     <!-- Right Pinky -->
+                     <body name="rh_pinky_pp" pos="0.046 0.119 0.015">
+                        <joint name="rh_pinky_pp_joint" axis="-0.95 0.22 0.21" range="0 0.83" class="hand_motor"/>
+                        <geom name="rh_pip_visual" type="mesh" mesh="rh_pinky_pp" class="visual"/>
+                        <body name="rh_pinky_mp" pos="0.010 0.038 0.004">
+                           <joint name="rh_pinky_mp_joint" axis="-0.95 0.22 0.21" range="0 0.96" class="hand_motor"/>
+                           <geom name="rh_pim_visual" type="mesh" mesh="rh_pinky_mp" class="visual"/>
+                           <body name="rh_pinky_dp" pos="0.007 0.027 0.003">
+                              <joint name="rh_pinky_dp_joint" axis="-0.95 0.22 0.21" range="0 0.68" class="hand_motor"/>
+                              <geom name="rh_pid_visual" type="mesh" mesh="rh_pinky_dp" class="visual"/>
+                           </body>
+                        </body>
+                     </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+
+        <!-- ==================== LEFT ARM (Mirrored) ==================== -->
+        <body name="left_shoulder_pitch_link" pos="-0.026 0.096 0.261">
+          <joint name="left_shoulder_pitch_joint" type="hinge" axis="0 1 0" range="-3.141 0.872" class="motor"/>
+          <geom name="l_sp_visual" type="mesh" mesh="l_shoulder_pitch" class="visual"/>
+          <body name="left_shoulder_roll_link" pos="0 0.065 0">
+            <joint name="left_shoulder_roll_joint" type="hinge" axis="-1 0 0" range="-1.57 0" class="motor"/>
+            <geom name="l_sr_visual" type="mesh" mesh="l_shoulder_roll" class="visual"/>
+            <geom name="l_sr_collision" class="collision" fromto="0 0.01 -0.02 0 0.01 -0.11" size="0.035"/>
+            <body name="left_shoulder_yaw_link" pos="0 0 -0.129">
+              <joint name="left_shoulder_yaw_joint" type="hinge" axis="0 0 -1" range="-1.57 1.57" class="motor"/>
+              <geom name="l_sy_visual" type="mesh" mesh="l_shoulder_yaw" class="visual"/>
+              <body name="left_elbow_link" pos="0 0 -0.096">
+                <joint name="left_elbow_joint" type="hinge" axis="0 -1 0" range="0 2.443" class="motor"/>
+                <geom name="l_elbow_visual" type="mesh" mesh="l_elbow" class="visual"/>
+                <geom name="l_elbow_collision" class="collision" fromto="0 0.01 0 0.09 0.01 -0.07" size="0.03"/>
+                <body name="left_wrist_yaw_link" pos="0.087 0 -0.073">
+                  <joint name="left_wrist_yaw_joint" type="hinge" axis="0.766 0 -0.643" range="-3.141 3.141" class="motor"/>
+                  <geom name="l_wrist_visual" type="mesh" mesh="l_wrist_yaw" class="visual"/>
+                  
+                  <!-- LEFT HAND ATTACHMENT -->
+                  <body name="lh_palm" pos="-0.035 0.0002 0.032" quat="0.3827 -0.9239 0 0"> <!-- Mirrored Quat -->
+                     <geom name="lh_palm_visual" type="mesh" mesh="lh_palm" class="visual"/>
+                     <geom name="lh_palm_collision" type="box" size="0.03 0.04 0.02" pos="-0.015 -0.03 0"/>
+                     
+                     <!-- Left Thumb (Mirrored Axes) -->
+                     <body name="lh_thumb_base" pos="0.029 0.062 -0.006">
+                        <joint name="lh_thumb_base_joint" axis="0.3 0.7 -0.65" range="0 2.27" class="hand_motor"/>
+                        <geom name="lh_tb_visual" type="mesh" mesh="lh_thumb_base" class="visual"/>
+                        <body name="lh_thumb_pp" pos="-0.044 -0.059 -0.010">
+                           <joint name="lh_thumb_pp_joint" axis="-0.09 0.7 0.71" range="-1.66 1.05" class="hand_motor"/>
+                           <geom name="lh_tp_visual" type="mesh" mesh="lh_thumb_pp" class="visual"/>
+                           <body name="lh_thumb_mp" pos="-0.047 -0.045 -0.018">
+                              <joint name="lh_thumb_mp_joint" axis="0.28 0.09 -0.95" range="0 0.96" class="hand_motor"/>
+                              <geom name="lh_tm_visual" type="mesh" mesh="lh_thumb_mp" class="visual"/>
+                              <body name="lh_thumb_dp" pos="-0.034 -0.006 -0.010">
+                                 <joint name="lh_thumb_dp_joint" axis="0.28 0.09 -0.95" range="0 0.68" class="hand_motor"/>
+                                 <geom name="lh_td_visual" type="mesh" mesh="lh_thumb_dp" class="visual"/>
+                              </body>
+                           </body>
+                        </body>
+                     </body>
+
+                     <!-- Left Index -->
+                     <body name="lh_index_pp" pos="-0.031 -0.133 0.020">
+                        <joint name="lh_index_pp_joint" axis="-0.99 0.1 -0.09" range="0 0.83" class="hand_motor"/>
+                        <geom name="lh_ip_visual" type="mesh" mesh="lh_index_pp" class="visual"/>
+                        <body name="lh_index_mp" pos="-0.005 -0.042 0.005">
+                           <joint name="lh_index_mp_joint" axis="-0.99 0.1 -0.09" range="0 0.96" class="hand_motor"/>
+                           <geom name="lh_im_visual" type="mesh" mesh="lh_index_mp" class="visual"/>
+                           <body name="lh_index_dp" pos="-0.004 -0.032 0.004">
+                              <joint name="lh_index_dp_joint" axis="-0.99 0.1 -0.09" range="0 0.68" class="hand_motor"/>
+                              <geom name="lh_id_visual" type="mesh" mesh="lh_index_dp" class="visual"/>
+                           </body>
+                        </body>
+                     </body>
+                     
+                     <!-- Left Middle -->
+                     <body name="lh_middle_pp" pos="-0.006 -0.135 0.022">
+                        <joint name="lh_middle_pp_joint" axis="-1 0 0" range="0 0.83" class="hand_motor"/>
+                        <geom name="lh_mp_visual" type="mesh" mesh="lh_middle_pp" class="visual"/>
+                        <body name="lh_middle_mp" pos="0 -0.047 0.006">
+                           <joint name="lh_middle_mp_joint" axis="-1 0 0" range="0 0.96" class="hand_motor"/>
+                           <geom name="lh_mm_visual" type="mesh" mesh="lh_middle_mp" class="visual"/>
+                           <body name="lh_middle_dp" pos="0 -0.034 0.004">
+                              <joint name="lh_middle_dp_joint" axis="-1 0 0" range="0 0.68" class="hand_motor"/>
+                              <geom name="lh_md_visual" type="mesh" mesh="lh_middle_dp" class="visual"/>
+                           </body>
+                        </body>
+                     </body>
+
+                     <!-- Left Ring -->
+                     <body name="lh_ring_pp" pos="0.020 -0.130 0.020">
+                        <joint name="lh_ring_pp_joint" axis="-0.99 -0.1 0.09" range="0 0.83" class="hand_motor"/>
+                        <geom name="lh_rp_visual" type="mesh" mesh="lh_ring_pp" class="visual"/>
+                        <body name="lh_ring_mp" pos="0.005 -0.042 0.005">
+                           <joint name="lh_ring_mp_joint" axis="-0.99 -0.1 0.09" range="0 0.96" class="hand_motor"/>
+                           <geom name="lh_rm_visual" type="mesh" mesh="lh_ring_mp" class="visual"/>
+                           <body name="lh_ring_dp" pos="0.004 -0.032 0.004">
+                              <joint name="lh_ring_dp_joint" axis="-0.99 -0.1 0.09" range="0 0.68" class="hand_motor"/>
+                              <geom name="lh_rd_visual" type="mesh" mesh="lh_ring_dp" class="visual"/>
+                           </body>
+                        </body>
+                     </body>
+
+                     <!-- Left Pinky -->
+                     <body name="lh_pinky_pp" pos="0.046 -0.119 0.015">
+                        <joint name="lh_pinky_pp_joint" axis="-0.95 -0.22 0.21" range="0 0.83" class="hand_motor"/>
+                        <geom name="lh_pip_visual" type="mesh" mesh="lh_pinky_pp" class="visual"/>
+                        <body name="lh_pinky_mp" pos="0.010 -0.038 0.004">
+                           <joint name="lh_pinky_mp_joint" axis="-0.95 -0.22 0.21" range="0 0.96" class="hand_motor"/>
+                           <geom name="lh_pim_visual" type="mesh" mesh="lh_pinky_mp" class="visual"/>
+                           <body name="lh_pinky_dp" pos="0.007 -0.027 0.003">
+                              <joint name="lh_pinky_dp_joint" axis="-0.95 -0.22 0.21" range="0 0.68" class="hand_motor"/>
+                              <geom name="lh_pid_visual" type="mesh" mesh="lh_pinky_dp" class="visual"/>
+                           </body>
+                        </body>
+                     </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <contact>
+    <!-- Exclude Internal Leg Joints -->
+    <exclude body1="pelvis_link" body2="left_hip_pitch_link"/>
+    <exclude body1="left_hip_pitch_link" body2="left_hip_roll_link"/>
+    <exclude body1="left_hip_roll_link" body2="left_hip_yaw_link"/>
+    <exclude body1="left_hip_yaw_link" body2="left_knee_link"/>
+    <exclude body1="left_knee_link" body2="left_ankle_pitch_link"/>
+    <exclude body1="left_ankle_pitch_link" body2="left_ankle_roll_link"/>
+    <exclude body1="left_ankle_roll_link" body2="left_toe_link"/>
+    
+    <exclude body1="pelvis_link" body2="right_hip_pitch_link"/>
+    <exclude body1="right_hip_pitch_link" body2="right_hip_roll_link"/>
+    <exclude body1="right_hip_roll_link" body2="right_hip_yaw_link"/>
+    <exclude body1="right_hip_yaw_link" body2="right_knee_link"/>
+    <exclude body1="right_knee_link" body2="right_ankle_pitch_link"/>
+    <exclude body1="right_ankle_pitch_link" body2="right_ankle_roll_link"/>
+    <exclude body1="right_ankle_roll_link" body2="right_toe_link"/>
+
+    <!-- Exclude Internal Arm Joints -->
+    <exclude body1="waist_yaw_link" body2="right_shoulder_pitch_link"/>
+    <exclude body1="right_shoulder_pitch_link" body2="right_shoulder_roll_link"/>
+    <exclude body1="right_shoulder_roll_link" body2="right_shoulder_yaw_link"/>
+    <exclude body1="right_shoulder_yaw_link" body2="right_elbow_link"/>
+    <exclude body1="right_elbow_link" body2="right_wrist_yaw_link"/>
+    <exclude body1="waist_yaw_link" body2="left_shoulder_pitch_link"/>
+    <exclude body1="left_shoulder_pitch_link" body2="left_shoulder_roll_link"/>
+    <exclude body1="left_shoulder_roll_link" body2="left_shoulder_yaw_link"/>
+    <exclude body1="left_shoulder_yaw_link" body2="left_elbow_link"/>
+    <exclude body1="left_elbow_link" body2="left_wrist_yaw_link"/>
+
+    <!-- Exclude Internal Hand Joints (Right) -->
+    <exclude body1="rh_palm" body2="rh_thumb_base"/>
+    <exclude body1="rh_thumb_base" body2="rh_thumb_pp"/>
+    <exclude body1="rh_thumb_pp" body2="rh_thumb_mp"/>
+    <exclude body1="rh_thumb_mp" body2="rh_thumb_dp"/>
+    <exclude body1="rh_palm" body2="rh_index_pp"/>
+    <exclude body1="rh_index_pp" body2="rh_index_mp"/>
+    <exclude body1="rh_index_mp" body2="rh_index_dp"/>
+    <exclude body1="rh_palm" body2="rh_middle_pp"/>
+    <exclude body1="rh_middle_pp" body2="rh_middle_mp"/>
+    <exclude body1="rh_middle_mp" body2="rh_middle_dp"/>
+    <exclude body1="rh_palm" body2="rh_ring_pp"/>
+    <exclude body1="rh_ring_pp" body2="rh_ring_mp"/>
+    <exclude body1="rh_ring_mp" body2="rh_ring_dp"/>
+    <exclude body1="rh_palm" body2="rh_pinky_pp"/>
+    <exclude body1="rh_pinky_pp" body2="rh_pinky_mp"/>
+    <exclude body1="rh_pinky_mp" body2="rh_pinky_dp"/>
+
+    <!-- Exclude Internal Hand Joints (Left) -->
+    <exclude body1="lh_palm" body2="lh_thumb_base"/>
+    <exclude body1="lh_thumb_base" body2="lh_thumb_pp"/>
+    <exclude body1="lh_thumb_pp" body2="lh_thumb_mp"/>
+    <exclude body1="lh_thumb_mp" body2="lh_thumb_dp"/>
+    <exclude body1="lh_palm" body2="lh_index_pp"/>
+    <exclude body1="lh_index_pp" body2="lh_index_mp"/>
+    <exclude body1="lh_index_mp" body2="lh_index_dp"/>
+    <exclude body1="lh_palm" body2="lh_middle_pp"/>
+    <exclude body1="lh_middle_pp" body2="lh_middle_mp"/>
+    <exclude body1="lh_middle_mp" body2="lh_middle_dp"/>
+    <exclude body1="lh_palm" body2="lh_ring_pp"/>
+    <exclude body1="lh_ring_pp" body2="lh_ring_mp"/>
+    <exclude body1="lh_ring_mp" body2="lh_ring_dp"/>
+    <exclude body1="lh_palm" body2="lh_pinky_pp"/>
+    <exclude body1="lh_pinky_pp" body2="lh_pinky_mp"/>
+    <exclude body1="lh_pinky_mp" body2="lh_pinky_dp"/>
+  </contact>
+
+  <sensor>
+    <gyro name="imu_ang_vel" site="imu_in_pelvis"/>
+    <velocimeter name="imu_lin_vel" site="imu_in_pelvis"/>
+    <accelerometer name="imu_lin_acc" site="imu_in_pelvis"/>
+    <framequat name="imu_quat" objtype="site" objname="imu_in_pelvis"/>
+  </sensor>
+
+  <actuator>
+    <!-- Legs -->
+    <position name="left_hip_pitch" joint="left_hip_pitch_joint" kp="150" kv="5"/>
+    <position name="left_hip_roll" joint="left_hip_roll_joint" kp="100" kv="4"/>
+    <position name="left_hip_yaw" joint="left_hip_yaw_joint" kp="80" kv="3"/>
+    <position name="left_knee" joint="left_knee_joint" kp="150" kv="5"/>
+    <position name="left_ankle_pitch" joint="left_ankle_pitch_joint" kp="80" kv="3"/>
+    <position name="left_ankle_roll" joint="left_ankle_roll_joint" kp="50" kv="2"/>
+    
+    <position name="right_hip_pitch" joint="right_hip_pitch_joint" kp="150" kv="5"/>
+    <position name="right_hip_roll" joint="right_hip_roll_joint" kp="100" kv="4"/>
+    <position name="right_hip_yaw" joint="right_hip_yaw_joint" kp="80" kv="3"/>
+    <position name="right_knee" joint="right_knee_joint" kp="150" kv="5"/>
+    <position name="right_ankle_pitch" joint="right_ankle_pitch_joint" kp="80" kv="3"/>
+    <position name="right_ankle_roll" joint="right_ankle_roll_joint" kp="50" kv="2"/>
+
+    <!-- Waist -->
+    <position name="waist_yaw" joint="waist_yaw_joint" kp="150" kv="5"/>
+
+    <!-- Arms -->
+    <position name="r_shoulder_pitch" joint="right_shoulder_pitch_joint" kp="40" kv="1.5"/>
+    <position name="r_shoulder_roll" joint="right_shoulder_roll_joint" kp="40" kv="1.5"/>
+    <position name="r_shoulder_yaw" joint="right_shoulder_yaw_joint" kp="40" kv="1.5"/>
+    <position name="r_elbow" joint="right_elbow_joint" kp="40" kv="1.5"/>
+    <position name="r_wrist" joint="right_wrist_yaw_joint" kp="30" kv="1"/>
+
+    <position name="l_shoulder_pitch" joint="left_shoulder_pitch_joint" kp="40" kv="1.5"/>
+    <position name="l_shoulder_roll" joint="left_shoulder_roll_joint" kp="40" kv="1.5"/>
+    <position name="l_shoulder_yaw" joint="left_shoulder_yaw_joint" kp="40" kv="1.5"/>
+    <position name="l_elbow" joint="left_elbow_joint" kp="40" kv="1.5"/>
+    <position name="l_wrist" joint="left_wrist_yaw_joint" kp="30" kv="1"/>
+
+    <!-- Hands (Simplified Position Control for RL) -->
+    <!-- Right Hand -->
+    <position name="rh_tb" joint="rh_thumb_base_joint" kp="2" kv="0.1"/>
+    <position name="rh_tp" joint="rh_thumb_pp_joint" kp="2" kv="0.1"/>
+    <position name="rh_tm" joint="rh_thumb_mp_joint" kp="4" kv="0.2"/>
+    <position name="rh_td" joint="rh_thumb_dp_joint" kp="4" kv="0.2"/>
+    <position name="rh_ip" joint="rh_index_pp_joint" kp="2" kv="0.1"/>
+    <position name="rh_im" joint="rh_index_mp_joint" kp="4" kv="0.2"/>
+    <position name="rh_id" joint="rh_index_dp_joint" kp="4" kv="0.2"/>
+    <position name="rh_mp" joint="rh_middle_pp_joint" kp="2" kv="0.1"/>
+    <position name="rh_mm" joint="rh_middle_mp_joint" kp="4" kv="0.2"/>
+    <position name="rh_md" joint="rh_middle_dp_joint" kp="4" kv="0.2"/>
+    <position name="rh_rp" joint="rh_ring_pp_joint" kp="2" kv="0.1"/>
+    <position name="rh_rm" joint="rh_ring_mp_joint" kp="4" kv="0.2"/>
+    <position name="rh_rd" joint="rh_ring_dp_joint" kp="4" kv="0.2"/>
+    <position name="rh_pip" joint="rh_pinky_pp_joint" kp="2" kv="0.1"/>
+    <position name="rh_pim" joint="rh_pinky_mp_joint" kp="4" kv="0.2"/>
+    <position name="rh_pid" joint="rh_pinky_dp_joint" kp="4" kv="0.2"/>
+
+    <!-- Left Hand -->
+    <position name="lh_tb" joint="lh_thumb_base_joint" kp="2" kv="0.1"/>
+    <position name="lh_tp" joint="lh_thumb_pp_joint" kp="2" kv="0.1"/>
+    <position name="lh_tm" joint="lh_thumb_mp_joint" kp="4" kv="0.2"/>
+    <position name="lh_td" joint="lh_thumb_dp_joint" kp="4" kv="0.2"/>
+    <position name="lh_ip" joint="lh_index_pp_joint" kp="2" kv="0.1"/>
+    <position name="lh_im" joint="lh_index_mp_joint" kp="4" kv="0.2"/>
+    <position name="lh_id" joint="lh_index_dp_joint" kp="4" kv="0.2"/>
+    <position name="lh_mp" joint="lh_middle_pp_joint" kp="2" kv="0.1"/>
+    <position name="lh_mm" joint="lh_middle_mp_joint" kp="4" kv="0.2"/>
+    <position name="lh_md" joint="lh_middle_dp_joint" kp="4" kv="0.2"/>
+    <position name="lh_rp" joint="lh_ring_pp_joint" kp="2" kv="0.1"/>
+    <position name="lh_rm" joint="lh_ring_mp_joint" kp="4" kv="0.2"/>
+    <position name="lh_rd" joint="lh_ring_dp_joint" kp="4" kv="0.2"/>
+    <position name="lh_pip" joint="lh_pinky_pp_joint" kp="2" kv="0.1"/>
+    <position name="lh_pim" joint="lh_pinky_mp_joint" kp="4" kv="0.2"/>
+    <position name="lh_pid" joint="lh_pinky_dp_joint" kp="4" kv="0.2"/>
+  </actuator>
+</mujoco>
