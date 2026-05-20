@@ -9,9 +9,9 @@ def compile_robot():
 
     # Determine paths relative to this script's location
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    input_xacro = os.path.join(script_dir, "../mechanical/xacro/master_assembly.xacro")
+    input_xacro = os.path.join(script_dir, "../assets/xacro/master_assembly.xacro")
     output_dir = os.path.join(script_dir, "../output")
-    output_urdf = os.path.join(output_dir, "revexbot.urdf")
+    output_urdf = os.path.join(output_dir, "revexbot1.urdf")
 
     # Normalize paths (resolve ..)
     input_xacro = os.path.normpath(input_xacro)
