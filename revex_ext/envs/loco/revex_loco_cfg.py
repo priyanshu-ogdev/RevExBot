@@ -7,7 +7,7 @@ from omni.isaac.lab.utils import configclass
 import omni.isaac.lab.envs.mdp as mdp
 import omni.isaac.lab.sim as sim_utils
 
-from . import custom_mdp
+from .. import custom_mdp
 
 @configclass
 class RevExCommandsCfg:
