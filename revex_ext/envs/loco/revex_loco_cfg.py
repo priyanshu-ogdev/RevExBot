@@ -1,23 +1,34 @@
-from dataclasses import dataclass
-from omni.isaac.lab.envs import RLEnvCfg
+# envs/skills/revex_loco_cfg.py
+import math
+from dataclasses import MISSING
+
+# Isaac Lab core imports
+from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
 from omni.isaac.lab.sim import SimulationCfg, PhysxCfg
 from omni.isaac.lab.scene import InteractiveSceneCfg
-from omni.isaac.lab.managers import RewardTermCfg, ObservationGroupCfg, ObservationTermCfg, EventTermCfg, SceneEntityCfg, CurriculumTermCfg
+from omni.isaac.lab.managers import RewardTermCfg, ObservationGroupCfg, ObservationTermCfg, EventTermCfg, SceneEntityCfg, CurriculumTermCfg, TerminationTermCfg
 from omni.isaac.lab.utils import configclass
+
+# Asset and Sensor Imports
+from omni.isaac.lab.assets import ArticulationCfg
+from omni.isaac.lab.sensors import ContactSensorCfg, ImuSensorCfg
+from omni.isaac.lab.terrains import TerrainImporterCfg
+from omni.isaac.lab.sim.spawns import UsdFileCfg
+
 import omni.isaac.lab.envs.mdp as mdp
 import omni.isaac.lab.sim as sim_utils
 
-from .. import custom_mdp
+# 🚨 GAP 119 FIX: Import our optimized custom MDP
+from .. import custom_mdp 
 
 @configclass
 class RevExCommandsCfg:
-    """Curriculum-based Command Generator."""
     base_velocity = mdp.UniformVelocityCommandCfg(
         asset_name="robot",
         resampling_time_range=(5.0, 5.0),
         simple_heading=False,
         ranges={
-            "lin_vel_x": (-0.5, 0.5), # Start slow
+            "lin_vel_x": (-0.5, 0.5), 
             "lin_vel_y": (-0.2, 0.2),
             "ang_vel_z": (-0.5, 0.5),
         },
@@ -25,26 +36,25 @@ class RevExCommandsCfg:
 
 @configclass
 class RevExActionsCfg:
-    """Action specifications for the RL agent."""
-    joint_positions = mdp.JointPositionActionCfg(
+    # 🚨 Effort Control: Perfectly matches Phase 2/3 for weight transfer
+    joint_efforts = mdp.JointEffortActionCfg(
         asset_name="robot",
-        joint_names=[".*"], # Applies to all actuated joints defined in the scene
-        scale=0.25,         # Neural network output [-1, 1] scales to [-0.25, 0.25] radians
-        use_default_offset=True # Actions are dynamically added to the default standing pose
+        joint_names=[".*"], 
+        scale=1.0,         
+        use_default_offset=True 
     )
 
 @configclass
 class RevExCurriculumCfg:
-    """Curriculum Manager to progressively increase task difficulty."""
     velocity_ranges = CurriculumTermCfg(
         func=mdp.modify_command_range, 
         mode="interval",
         params={
             "command_name": "base_velocity",
             "parameter": "lin_vel_x",
-            "min": -0.5, "max": 0.5,       # Start slow
-            "final_min": -2.0, "final_max": 2.0, # End fast
-            "num_steps": 10000             # Over 10k environment steps
+            "min": -0.5, "max": 0.5,       
+            "final_min": -2.0, "final_max": 2.0, 
+            "num_steps": 10000             
         }
     )
 
@@ -55,10 +65,16 @@ class RevExRewardsCfg:
     tracking_ang_vel = RewardTermCfg(func=mdp.track_ang_vel_z_exp, weight=0.75, params={"std": 0.25})
     alive_bonus = RewardTermCfg(func=mdp.is_alive, weight=0.1)
     
-    # 2. Smoothness & Actuator Protection (Native C++ Loss)
+    # 2. Smoothness & True Mechanical Power
     action_rate_penalty = RewardTermCfg(func=mdp.action_rate_l2, weight=-0.05)
     joint_accel_penalty = RewardTermCfg(func=mdp.joint_accel_l2, weight=-0.01)
-    energy_cost = RewardTermCfg(func=custom_mdp.power_consumption, weight=-0.0005, params={"asset_cfg": SceneEntityCfg("robot")})
+    
+    # 🚨 GAP 119 FIX: Re-activated True Power Consumption
+    energy_cost = RewardTermCfg(
+        func=custom_mdp.power_consumption, 
+        weight=-0.0005, 
+        params={"asset_cfg": SceneEntityCfg("robot")}
+    )
     
     # 3. Humanistic Gait Shaping
     knee_compliance = RewardTermCfg(
@@ -66,16 +82,19 @@ class RevExRewardsCfg:
         weight=0.5, 
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_knee_joint"]), "target": 0.15}
     )
+    
+    # 🚨 GAP 119 FIX: Re-activated Contralateral Arm Swing
     arm_swing = RewardTermCfg(
         func=custom_mdp.arm_swing_symmetry, 
         weight=0.2, 
-        params={"asset_cfg": SceneEntityCfg("robot")}
+        params={
+            "left_arm_cfg": SceneEntityCfg("robot", joint_names=["left_shoulder_pitch_joint"]),
+            "right_arm_cfg": SceneEntityCfg("robot", joint_names=["right_shoulder_pitch_joint"]),
+            "left_leg_cfg": SceneEntityCfg("robot", joint_names=["left_hip_pitch_joint"]),
+            "right_leg_cfg": SceneEntityCfg("robot", joint_names=["right_hip_pitch_joint"]),
+        }
     )
-    feet_air_time = RewardTermCfg(
-        func=custom_mdp.feet_air_time, 
-        weight=0.5, 
-        params={"sensor_cfg": SceneEntityCfg("contact_forces")}
-    )
+    
     foot_slip = RewardTermCfg(
         func=mdp.foot_slip,
         weight=-0.2,
@@ -90,41 +109,83 @@ class RevExRewardsCfg:
 class RevExObservationsCfg:
     @configclass
     class PolicyCfg(ObservationGroupCfg):
-        # Noisy Proprioception (Actor)
-        projected_gravity = ObservationTermCfg(func=mdp.projected_gravity_b, noise=mdp.add_uniform_noise, noise_params={"range": [-0.01, 0.01]})
+        projected_gravity = ObservationTermCfg(func=mdp.projected_gravity, noise=mdp.add_uniform_noise, noise_params={"range": [-0.01, 0.01]})
         joint_pos = ObservationTermCfg(func=mdp.joint_pos_rel, noise=mdp.add_uniform_noise, noise_params={"range": [-0.01, 0.01]})
         joint_vel = ObservationTermCfg(func=mdp.joint_vel_rel, noise=mdp.add_uniform_noise, noise_params={"range": [-0.1, 0.1]})
         actions = ObservationTermCfg(func=mdp.last_action)
-        imu_lin_acc = ObservationTermCfg(func=mdp.imu_lin_acc_b, params={"sensor_cfg": SceneEntityCfg("imu_sensor")})
-        imu_ang_vel = ObservationTermCfg(func=mdp.imu_ang_vel_b, params={"sensor_cfg": SceneEntityCfg("imu_sensor")})
+        imu_lin_acc = ObservationTermCfg(func=mdp.imu_lin_acc, params={"sensor_cfg": SceneEntityCfg("imu_sensor")})
+        imu_ang_vel = ObservationTermCfg(func=mdp.imu_ang_vel, params={"sensor_cfg": SceneEntityCfg("imu_sensor")})
         velocity_commands = ObservationTermCfg(func=mdp.generated_commands, params={"command_name": "base_velocity"})
+
+        def __post_init__(self):
+            self.enable_corruption = True
+            self.concatenate_terms = True
 
     @configclass
     class CriticCfg(ObservationGroupCfg):
-        # Privileged State (Critic)
         joint_pos = ObservationTermCfg(func=mdp.joint_pos_rel)
         joint_vel = ObservationTermCfg(func=mdp.joint_vel_rel)
-        projected_gravity = ObservationTermCfg(func=mdp.projected_gravity_b)
+        projected_gravity = ObservationTermCfg(func=mdp.projected_gravity)
         actions = ObservationTermCfg(func=mdp.last_action)
         velocity_commands = ObservationTermCfg(func=mdp.generated_commands, params={"command_name": "base_velocity"})
         
-        # 🔥 The "God-Mode" Additions
-        true_base_lin_vel = ObservationTermCfg(func=mdp.base_lin_vel_b)
-        true_base_ang_vel = ObservationTermCfg(func=mdp.base_ang_vel_b)
+        true_base_lin_vel = ObservationTermCfg(func=mdp.base_lin_vel)
+        true_base_ang_vel = ObservationTermCfg(func=mdp.base_ang_vel)
         friction_coeffs = ObservationTermCfg(func=mdp.body_friction_coeffs, params={"asset_cfg": SceneEntityCfg("robot")})
+
+        def __post_init__(self):
+            self.enable_corruption = False
+            self.concatenate_terms = True
 
     policy: PolicyCfg = PolicyCfg()
     critic: CriticCfg = CriticCfg()
 
 @configclass
+class RevExEventsCfg:
+    randomize_friction = EventTermCfg(
+        func=mdp.randomize_rigid_body_material,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*"), 
+            "static_friction_range": [0.7, 1.3], 
+            "operation": "scale"
+        }
+    )
+    randomize_mass = EventTermCfg(
+        func=mdp.randomize_rigid_body_mass,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*"), 
+            "mass_distribution_params": [0.9, 1.1], 
+            "operation": "scale"
+        }
+    )
+
+@configclass
+class RevExTerminationsCfg:
+    base_orientation = TerminationTermCfg(
+        func=mdp.bad_orientation, 
+        params={"limit_angle": 0.7}
+    )
+    joint_limits = TerminationTermCfg(
+        func=mdp.joint_pos_out_of_limit, 
+        params={"asset_cfg": SceneEntityCfg("robot"), "threshold": 0.95}
+    )
+    base_height = TerminationTermCfg(
+        func=mdp.base_height_below_threshold,
+        params={"asset_cfg": SceneEntityCfg("robot"), "threshold": 0.3}
+    )
+
+@configclass
 class RevExSceneCfg(InteractiveSceneCfg):
     num_envs = 2048
     env_spacing = 2.0
-    terrain = mdp.TerrainImporterCfg(prim_path="/World/ground", terrain_type="plane")
     
-    robot = mdp.ArticulationCfg(
+    terrain = TerrainImporterCfg(prim_path="/World/ground", terrain_type="plane")
+    
+    robot = ArticulationCfg(
         prim_path="{ENV_REGEX_NS}/Robot",
-        spawn=sim_utils.UsdFileCfg(
+        spawn=UsdFileCfg(
             usd_path="assets/usd/revexbot.usd",
             activate_contact_sensors=True,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(
@@ -142,7 +203,7 @@ class RevExSceneCfg(InteractiveSceneCfg):
                 solver_velocity_iteration_count=0,
             ),
         ),
-        init_state=mdp.ArticulationCfg.InitialStateCfg(
+        init_state=ArticulationCfg.InitialStateCfg(
             pos=(0.0, 0.0, 0.63),
             joint_pos={
                 "left_hip_pitch_joint": 0.0,
@@ -186,61 +247,37 @@ class RevExSceneCfg(InteractiveSceneCfg):
         },
     )
 
-    contact_forces = mdp.ContactSensorCfg(
+    contact_forces = ContactSensorCfg(
         prim_path="{ENV_REGEX_NS}/Robot/.*_toe_link|{ENV_REGEX_NS}/Robot/.*ankle_roll_link", 
         history_length=3,
         filter_prim_paths_expr=["{ENV_REGEX_NS}/Robot"]
     )
-    imu_sensor = mdp.ImuSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/imu_in_pelvis")
+    imu_sensor = ImuSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/imu_in_pelvis")
 
 @configclass
-class RevExEventsCfg:
-    randomize_friction = EventTermCfg(
-        func=mdp.randomize_rigid_body_material,
-        mode="reset",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*"), 
-            "static_friction_range": [0.7, 1.3], 
-            "operation": "scale"
-        }
-    )
-    randomize_mass = EventTermCfg(
-        func=mdp.randomize_rigid_body_mass,
-        mode="reset",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*"), 
-            "mass_distribution_params": [0.9, 1.1], 
-            "operation": "scale"
-        }
-    )
-
-@configclass
-class RevExLocoCfg(RLEnvCfg):
-    seed: int = 42
-    episode_length_s: float = 5.0 
-    
-    sim: SimulationCfg = SimulationCfg(
-        dt=0.005, 
-        substeps=4, 
-        use_gpu_pipeline=True,
-        physx=PhysxCfg(
-            bounce_threshold_velocity=0.2,
-            friction_offset_threshold=0.04,
-            friction_correlation_distance=0.025,
-            gpu_max_rigid_contact_count=2**24,
-            gpu_max_rigid_patch_count=2**24
-        )
-    )
-    
-    scene: RevExSceneCfg = RevExSceneCfg()
+class RevExLocoCfg(ManagerBasedRLEnvCfg):
+    # 🚨 GAP 120 FIX: Declare managers safely at the class level
+    scene: RevExSceneCfg = RevExSceneCfg(num_envs=2048, env_spacing=2.0)
     actions: RevExActionsCfg = RevExActionsCfg()
     commands: RevExCommandsCfg = RevExCommandsCfg()
     curriculum: RevExCurriculumCfg = RevExCurriculumCfg()
     rewards: RevExRewardsCfg = RevExRewardsCfg()
     events: RevExEventsCfg = RevExEventsCfg()
     observations: RevExObservationsCfg = RevExObservationsCfg()
+    terminations: RevExTerminationsCfg = RevExTerminationsCfg()
     
-    terminations: dict = {
-        "base_orientation": {"func": mdp.bad_orientation, "params": {"limit_angle": 0.7}},
-        "joint_limits": {"func": mdp.joint_pos_out_of_limit, "params": {"threshold": 0.95}}
-    }
+    def __post_init__(self):
+        self.episode_length_s = 5.0 
+        self.sim = SimulationCfg(
+            dt=0.005, 
+            substeps=4, 
+            use_gpu_pipeline=True,
+            physx=PhysxCfg(
+                bounce_threshold_velocity=0.2,
+                friction_offset_threshold=0.04,
+                friction_correlation_distance=0.025,
+                gpu_max_rigid_contact_count=2**24,
+                gpu_max_rigid_patch_count=2**24
+            )
+        )
+        self.is_asymmetric = True

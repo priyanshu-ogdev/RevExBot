@@ -1,10 +1,9 @@
-from omni.isaac.lab.envs import RLEnv
+from omni.isaac.lab.envs import ManagerBasedRLEnv # 🚨 UPGRADED
 from .revex_loco_cfg import RevExLocoCfg
 
-class RevExLocoEnv(RLEnv):
+class RevExLocoEnv(ManagerBasedRLEnv):
     """
-    RevEx Phase 1 Environment.
-    Logic is entirely delegated to RevExLocoCfg and executed via the Manager classes.
+    RevEx Phase 1: Base Locomotion Environment.
     """
     def __init__(self, cfg: RevExLocoCfg, render_mode: str | None = None, **kwargs):
         super().__init__(cfg, render_mode, **kwargs)

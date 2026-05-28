@@ -1,0 +1,51 @@
+params:
+  seed: 42
+  algo:
+    name: amp_continuous 
+  model:
+    name: continuous_amp_logstd
+  network:
+    name: amp_actor_critic
+    separate: True # SOTA: Asymmetric
+    
+    mlp:
+      units: [512, 256, 128] 
+      activation: elu
+      
+    value:
+      units: [512, 256, 128]
+      activation: elu
+  
+  amp_config:
+    replay_buffer_size: 500000   
+    expert_batch_size: 8192      # GAP 132 FIX: Increased for stricter Discriminator
+    discriminator_reward_scale: 1.5 
+    discriminator_network:
+      units: [1024, 512]
+      activation: relu
+    
+  config:
+    name: revex_skill_dance
+    env_name: rlgames
+    device: 'cuda:0'
+    mixed_precision: True
+    ppo: True
+    
+    # SOTA Normalization & Bounds
+    normalize_input: True
+    normalize_value: True
+    value_bootstrap: True
+    bounds_loss_coef: 0.0005 
+    
+    optimizer: adam 
+    learning_rate: 5e-5      
+    weight_decay: 0.001
+    
+    gamma: 0.99
+    tau: 0.95
+    kl_threshold: 0.008      
+    max_epochs: 6000         
+    horizon_length: 32       
+    minibatch_size: 4096     
+    mini_epochs: 4
+    seq_len: 4

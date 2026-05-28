@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot name="RevEx_Full_Assembly" xmlns:xacro="http://wiki.ros.org/xacro">
 
-  <xacro:property name="mesh_dir" value="../mechanical/meshes" />
+  <xacro:property name="mesh_dir" value="../meshes" />
 
   <material name="Grey"><color rgba="0.6 0.6 0.6 1.0" /></material>
   <material name="DarkGrey"><color rgba="0.22 0.22 0.22 1.0" /></material>
@@ -44,9 +44,9 @@
     <origin xyz="-0.052 0.0675 -0.044045" rpy="0 0 0" />
     <parent link="pelvis_link" /><child link="left_hip_pitch_link" />
     <axis xyz="0 1 0" />
-    <!-- Matched to MuJoCo range: [-2.094395, 1.0] -->
     <limit lower="-2.094" upper="1.0" effort="120" velocity="8" />
-    <dynamics damping="0.095625" friction="0.15" />
+    <!-- GAP 1 FIX: Added armature for gearbox inertia -->
+    <dynamics damping="0.095625" friction="0.15" armature="0.02" />
   </joint>
 
   <link name="left_hip_roll_link">
@@ -62,9 +62,8 @@
     <origin xyz="0.0422501 0.0400002759400924 0" rpy="0 0 0" />
     <parent link="left_hip_pitch_link" /><child link="left_hip_roll_link" />
     <axis xyz="1 0 0" />
-    <!-- Matched to MuJoCo range: ±0.785398 (45°) -->
     <limit lower="-0.785398" upper="0.785398" effort="100" velocity="8" />
-    <dynamics damping="0.11" friction="0.15" />
+    <dynamics damping="0.11" friction="0.15" armature="0.02" />
   </joint>
 
   <link name="left_hip_yaw_link">
@@ -84,9 +83,8 @@
     <origin xyz="-0.0422499999999954 0 -0.0520000000000006" rpy="0 0 0" />
     <parent link="left_hip_roll_link" /><child link="left_hip_yaw_link" />
     <axis xyz="0 0 -1" />
-    <!-- Matched to MuJoCo range: ±0.785398 (45°) -->
     <limit lower="-0.785398" upper="0.785398" effort="80" velocity="8" />
-    <dynamics damping="0.038" friction="0.15" />
+    <dynamics damping="0.038" friction="0.15" armature="0.02" />
   </joint>
 
   <link name="left_knee_link">
@@ -107,7 +105,7 @@
     <parent link="left_hip_yaw_link" /><child link="left_knee_link" />
     <axis xyz="0 1 0" />
     <limit lower="0" upper="1.5" effort="150" velocity="8" />
-    <dynamics damping="0.0339552" friction="0.15" />
+    <dynamics damping="0.0339552" friction="0.15" armature="0.02" />
   </joint>
 
   <link name="left_ankle_pitch_link">
@@ -124,7 +122,7 @@
     <parent link="left_knee_link" /><child link="left_ankle_pitch_link" />
     <axis xyz="0 1 0" />
     <limit lower="-0.35" upper="0.35" effort="80" velocity="8" />
-    <dynamics damping="0.0565056" friction="0.15" />
+    <dynamics damping="0.0565056" friction="0.15" armature="0.01" />
   </joint>
 
   <link name="left_ankle_roll_link">
@@ -141,7 +139,7 @@
     <parent link="left_ankle_pitch_link" /><child link="left_ankle_roll_link" />
     <axis xyz="-1 0 0" />
     <limit lower="-0.1" upper="0.1" effort="50" velocity="8" />
-    <dynamics damping="0.0565056" friction="0.15" />
+    <dynamics damping="0.0565056" friction="0.15" armature="0.01" />
   </joint>
 
   <link name="left_toe_link">
@@ -151,18 +149,18 @@
       <inertia ixx="5.5351925218088e-05" ixy="0" ixz="0" iyy="3.65130809524718e-05" iyz="0" izz="8.54029969529202e-05" />
     </inertial>
     <visual><origin xyz="0 0.008 0" rpy="0 0 0" /><geometry><mesh filename="${mesh_dir}/LEFT_TOE.STL" /></geometry><material name="DarkGrey" /></visual>
+    <!-- GAP 3 FIX: Padded collision box to prevent floor clipping -->
     <collision name="left_toe_collision">
-      <origin xyz="0.025 0 0" rpy="0 0 0" />
-      <geometry><box size="0.05 0.06 0.008" /></geometry>
+      <origin xyz="0.025 0 0.006" rpy="0 0 0" />
+      <geometry><box size="0.05 0.06 0.02" /></geometry>
     </collision>
   </link>
   <joint name="left_toe_joint" type="revolute">
     <origin xyz="0.10253 -0.0043664 -0.0067324" rpy="0 0 0" />
     <parent link="left_ankle_roll_link" /><child link="left_toe_link" />
     <axis xyz="0.010532 0.99994 0" />
-    <!-- Matched to MuJoCo range: [-1.047, 0] (only plantarflexion) -->
     <limit lower="-1.047" upper="0" effort="30" velocity="8" />
-    <dynamics damping="0.001" friction="0.02" />
+    <dynamics damping="0.001" friction="0.02" armature="0.001" />
   </joint>
 
   <!-- ========== RIGHT LEG ========== -->
@@ -183,9 +181,8 @@
     <origin xyz="-0.0519999999999999 -0.0675 -0.0440449999999999" rpy="0 0 0" />
     <parent link="pelvis_link" /><child link="right_hip_pitch_link" />
     <axis xyz="0 -1 0" />
-    <!-- Matched to MuJoCo range: [-1.0, 2.094395] -->
     <limit lower="-1.0" upper="2.094" effort="120" velocity="8" />
-    <dynamics damping="0.095625" friction="0.15" />
+    <dynamics damping="0.095625" friction="0.15" armature="0.02" />
   </joint>
 
   <link name="right_hip_roll_link">
@@ -201,9 +198,8 @@
     <origin xyz="0.04225 -0.04 0" rpy="0 0 0" />
     <parent link="right_hip_pitch_link" /><child link="right_hip_roll_link" />
     <axis xyz="1 0 0" />
-    <!-- Matched to MuJoCo range: ±0.785398 (45°) -->
     <limit lower="-0.785398" upper="0.785398" effort="100" velocity="8" />
-    <dynamics damping="0.11" friction="0.15" />
+    <dynamics damping="0.11" friction="0.15" armature="0.02" />
   </joint>
 
   <link name="right_hip_yaw_link">
@@ -223,9 +219,8 @@
     <origin xyz="-0.0422499999999986 0 -0.0520000000000019" rpy="0 0 0" />
     <parent link="right_hip_roll_link" /><child link="right_hip_yaw_link" />
     <axis xyz="0 0 -1" />
-    <!-- Matched to MuJoCo range: ±0.785398 (45°) -->
     <limit lower="-0.785398" upper="0.785398" effort="80" velocity="8" />
-    <dynamics damping="0.038" friction="0.15" />
+    <dynamics damping="0.038" friction="0.15" armature="0.02" />
   </joint>
 
   <link name="right_knee_link">
@@ -246,7 +241,7 @@
     <parent link="right_hip_yaw_link" /><child link="right_knee_link" />
     <axis xyz="0 -1 0" />
     <limit lower="-1.5" upper="0" effort="150" velocity="8" />
-    <dynamics damping="0.0339552" friction="0.15" />
+    <dynamics damping="0.0339552" friction="0.15" armature="0.02" />
   </joint>
 
   <link name="right_ankle_pitch_link">
@@ -263,7 +258,7 @@
     <parent link="right_knee_link" /><child link="right_ankle_pitch_link" />
     <axis xyz="0 -1 0" />
     <limit lower="-0.35" upper="0.35" effort="80" velocity="8" />
-    <dynamics damping="0.0565056" friction="0.15" />
+    <dynamics damping="0.0565056" friction="0.15" armature="0.01" />
   </joint>
 
   <link name="right_ankle_roll_link">
@@ -280,7 +275,7 @@
     <parent link="right_ankle_pitch_link" /><child link="right_ankle_roll_link" />
     <axis xyz="-1 0 0" />
     <limit lower="-0.1" upper="0.1" effort="50" velocity="8" />
-    <dynamics damping="0.0565056" friction="0.15" />
+    <dynamics damping="0.0565056" friction="0.15" armature="0.01" />
   </joint>
 
   <link name="right_toe_link">
@@ -290,18 +285,18 @@
       <inertia ixx="5.5358948695321e-05" ixy="0" ixz="0" iyy="3.65052769951383e-05" iyz="0" izz="8.54017357052965e-05" />
     </inertial>
     <visual><origin xyz="0 -0.008 0" rpy="0 0 0" /><geometry><mesh filename="${mesh_dir}/RIGHT_TOE.STL" /></geometry><material name="DarkGrey" /></visual>
+    <!-- GAP 3 FIX: Padded collision box to prevent floor clipping -->
     <collision name="right_toe_collision">
-      <origin xyz="0.025 0 0" rpy="0 0 0" />
-      <geometry><box size="0.05 0.06 0.008" /></geometry>
+      <origin xyz="0.025 0 0.006" rpy="0 0 0" />
+      <geometry><box size="0.05 0.06 0.02" /></geometry>
     </collision>
   </link>
   <joint name="right_toe_joint" type="revolute">
     <origin xyz="0.10247 0.0042796 -0.0067324" rpy="0 0 0" />
     <parent link="right_ankle_roll_link" /><child link="right_toe_link" />
     <axis xyz="0.0074685 -0.99997 0" />
-    <!-- Matched to MuJoCo range: [0, 1.047] (only dorsiflexion) -->
     <limit lower="0" upper="1.047" effort="30" velocity="8" />
-    <dynamics damping="0.001" friction="0.02" />
+    <dynamics damping="0.001" friction="0.02" armature="0.001" />
   </joint>
 
   <!-- ========== UPPER BODY ========== -->
@@ -322,13 +317,11 @@
     <origin xyz="-0.052 0 0.074755" rpy="0 0 0" />
     <parent link="pelvis_link" /><child link="waist_yaw_link" />
     <axis xyz="0 0 1" />
-    <!-- Matched to MuJoCo range: ±1.570796 (90°) -->
     <limit lower="-1.570796" upper="1.570796" effort="150" velocity="5" />
-    <dynamics damping="0.095625" friction="0.15" />
+    <dynamics damping="0.095625" friction="0.15" armature="0.02" />
   </joint>
 
   <!-- ========== NECK & HEAD ========== -->
-  <!-- KEPT EXACTLY AS YOUR ORIGINAL (Ignore point 2) -->
   <link name="neck_yaw_link">
     <inertial>
       <origin xyz="0 0 0.01" rpy="0 0 0" />
@@ -346,7 +339,7 @@
     <parent link="waist_yaw_link" /><child link="neck_yaw_link" />
     <axis xyz="0 0 1" />
     <limit lower="-1.571" upper="1.571" effort="20" velocity="5" />
-    <dynamics damping="0.0565" friction="0.08" />
+    <dynamics damping="0.0565" friction="0.08" armature="0.001" />
   </joint>
 
   <link name="head_link">
@@ -370,7 +363,7 @@
     <parent link="neck_yaw_link" /><child link="head_link" />
     <axis xyz="0 1 0" />
     <limit lower="-0.5" upper="0.5" effort="20" velocity="5" />
-    <dynamics damping="0.0565" friction="0.08" />
+    <dynamics damping="0.0565" friction="0.08" armature="0.001" />
   </joint>
 
   <!-- ========== RIGHT ARM ========== -->
@@ -388,7 +381,7 @@
     <parent link="waist_yaw_link" /><child link="right_shoulder_pitch_link" />
     <axis xyz="0 -1 0" />
     <limit lower="-0.872" upper="3.141" effort="80" velocity="6" />
-    <dynamics damping="0.11" friction="0.08" />
+    <dynamics damping="0.11" friction="0.08" armature="0.01" />
   </joint>
 
   <link name="right_shoulder_roll_link">
@@ -409,7 +402,7 @@
     <parent link="right_shoulder_pitch_link" /><child link="right_shoulder_roll_link" />
     <axis xyz="-1 0 0" />
     <limit lower="0" upper="1.571" effort="80" velocity="6" />
-    <dynamics damping="0.0339552" friction="0.08" />
+    <dynamics damping="0.0339552" friction="0.08" armature="0.01" />
   </joint>
 
   <link name="right_shoulder_yaw_link">
@@ -426,7 +419,7 @@
     <parent link="right_shoulder_roll_link" /><child link="right_shoulder_yaw_link" />
     <axis xyz="0 0 -1" />
     <limit lower="-1.571" upper="1.571" effort="60" velocity="6" />
-    <dynamics damping="0.038" friction="0.08" />
+    <dynamics damping="0.038" friction="0.08" armature="0.01" />
   </joint>
 
   <link name="right_elbow_link">
@@ -447,15 +440,15 @@
     <parent link="right_shoulder_yaw_link" /><child link="right_elbow_link" />
     <axis xyz="0 1 0" />
     <limit lower="-2.443" upper="0" effort="60" velocity="6" />
-    <dynamics damping="0.0282528" friction="0.08" />
+    <dynamics damping="0.0282528" friction="0.08" armature="0.01" />
   </joint>
 
+  <!-- GAP 2 FIX: Inflated wrist mass and inertia for stability -->
   <link name="right_wrist_yaw_link">
     <inertial>
       <origin xyz="0.00382289129248181 8.36540312021405E-09 -0.00320778585722904" rpy="0 0 0" />
-      <mass value="0.0580595106779709" />
-      <inertia ixx="1.18803001723724E-05" ixy="3.73796867740447E-08" ixz="-3.06346018877142E-06"
-               iyy="8.8546080362749E-06" iyz="4.45423430732884E-08" izz="1.07999391749915E-05" />
+      <mass value="0.15" />
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
     </inertial>
     <visual><geometry><mesh filename="${mesh_dir}/RIGHT_WRIST_YAW.STL" /></geometry><material name="Grey" /></visual>
   </link>
@@ -464,7 +457,7 @@
     <parent link="right_elbow_link" /><child link="right_wrist_yaw_link" />
     <axis xyz="0.766044443118981 0 -0.642787609686536" />
     <limit lower="-3.141" upper="3.141" effort="30" velocity="8" />
-    <dynamics damping="0.0282528" friction="0.08" />
+    <dynamics damping="0.0282528" friction="0.08" armature="0.001" />
   </joint>
 
   <!-- ========== LEFT ARM ========== -->
@@ -482,7 +475,7 @@
     <parent link="waist_yaw_link" /><child link="left_shoulder_pitch_link" />
     <axis xyz="0 1 0" />
     <limit lower="-3.141" upper="0.872" effort="80" velocity="6" />
-    <dynamics damping="0.11" friction="0.08" />
+    <dynamics damping="0.11" friction="0.08" armature="0.01" />
   </joint>
 
   <link name="left_shoulder_roll_link">
@@ -503,7 +496,7 @@
     <parent link="left_shoulder_pitch_link" /><child link="left_shoulder_roll_link" />
     <axis xyz="-1 0 0" />
     <limit lower="-1.571" upper="0" effort="80" velocity="6" />
-    <dynamics damping="0.0339552" friction="0.08" />
+    <dynamics damping="0.0339552" friction="0.08" armature="0.01" />
   </joint>
 
   <link name="left_shoulder_yaw_link">
@@ -520,7 +513,7 @@
     <parent link="left_shoulder_roll_link" /><child link="left_shoulder_yaw_link" />
     <axis xyz="0 0 -1" />
     <limit lower="-1.571" upper="1.571" effort="60" velocity="6" />
-    <dynamics damping="0.038" friction="0.08" />
+    <dynamics damping="0.038" friction="0.08" armature="0.01" />
   </joint>
 
   <link name="left_elbow_link">
@@ -541,15 +534,15 @@
     <parent link="left_shoulder_yaw_link" /><child link="left_elbow_link" />
     <axis xyz="0 -1 0" />
     <limit lower="0" upper="2.443" effort="60" velocity="6" />
-    <dynamics damping="0.0282528" friction="0.08" />
+    <dynamics damping="0.0282528" friction="0.08" armature="0.01" />
   </joint>
 
+  <!-- GAP 2 FIX: Inflated wrist mass and inertia for stability -->
   <link name="left_wrist_yaw_link">
     <inertial>
       <origin xyz="0.00382289324376062 1.7394452961339E-08 -0.00320774203668756" rpy="0 0 0" />
-      <mass value="0.058058790654763" />
-      <inertia ixx="1.20674298017884E-05" ixy="1.83335345917148E-07" ixz="-2.8402536561247E-06"
-               iyy="8.40130139890341E-06" iyz="2.18479301532613E-07" izz="1.10658034937549E-05" />
+      <mass value="0.15" />
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
     </inertial>
     <visual><geometry><mesh filename="${mesh_dir}/LEFT_WRIST_YAW.STL" /></geometry><material name="Grey" /></visual>
   </link>
@@ -558,7 +551,7 @@
     <parent link="left_elbow_link" /><child link="left_wrist_yaw_link" />
     <axis xyz="0.766044443118927 0 -0.642787609686601" />
     <limit lower="-3.141" upper="3.141" effort="30" velocity="8" />
-    <dynamics damping="0.0282528" friction="0.08" />
+    <dynamics damping="0.0282528" friction="0.08" armature="0.001" />
   </joint>
 
   <xacro:include filename="faive_hand.xacro" />
@@ -573,14 +566,14 @@
   <joint name="right_wrist_to_hand" type="fixed">
       <parent link="right_wrist_yaw_link" />
       <child link="rh_palm" />
-      <origin xyz="-0.035 -0.000182 0.032" rpy="0.7854 3.14159 -1.5708" />   <!-- roll=0, pitch=+90°, yaw=+90° -->
+      <origin xyz="-0.035 -0.000182 0.032" rpy="0.7854 3.14159 -1.5708" />
   </joint>
 
   <!-- Left hand attachment: pitch -90°, yaw +90° -->
   <joint name="left_wrist_to_hand" type="fixed">
       <parent link="left_wrist_yaw_link" />
       <child link="lh_palm" />
-      <origin xyz="-0.035 0.000182 0.032" rpy="-0.7854 3.14159 1.5708" />  <!-- pitch=-90°, yaw=+90° -->
+      <origin xyz="-0.035 0.000182 0.032" rpy="-0.7854 3.14159 1.5708" />
   </joint>
 
 </robot>

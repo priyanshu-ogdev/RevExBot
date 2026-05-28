@@ -1,0 +1,53 @@
+# cfg/train/skill_combat_amp.yaml
+params:
+  seed: 42
+  algo:
+    name: amp_continuous 
+  model:
+    name: continuous_amp_logstd
+  network:
+    name: amp_actor_critic
+    separate: True # SOTA: Asymmetric
+    
+    mlp:
+      units: [512, 256, 128] 
+      activation: elu
+      
+    value:
+      units: [512, 256, 128]
+      activation: elu
+  
+  amp_config:
+    replay_buffer_size: 500000   
+    expert_batch_size: 8192      # Strong Discriminator (>= minibatch_size)
+    discriminator_reward_scale: 2.0 
+    discriminator_network:
+      units: [1024, 512]
+      activation: relu
+    
+  config:
+    name: revex_skill_combat
+    env_name: rlgames
+    device: 'cuda:0'
+    mixed_precision: True
+    ppo: True
+    
+    # SOTA Normalization & Bounds
+    normalize_input: True
+    normalize_value: True
+    value_bootstrap: True
+    bounds_loss_coef: 0.0005 # Prevents Actuator Meltdown
+    
+    optimizer: adam 
+    learning_rate: 1e-4      
+    weight_decay: 0.001
+    
+    gamma: 0.99
+    tau: 0.95
+    kl_threshold: 0.015 
+    max_epochs: 5000
+    
+    horizon_length: 32 
+    minibatch_size: 4096         
+    mini_epochs: 6
+    seq_len: 4
