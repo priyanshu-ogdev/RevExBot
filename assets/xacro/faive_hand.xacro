@@ -2,20 +2,16 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="faive_hand">
 
     <xacro:macro name="faive_hand" params="prefix mesh_dir mirror_factor:=1">
-       
-        <!-- Uniform scaling for the hand -->
+        
         <xacro:property name="s" value="1.0" />   
         <xacro:property name="mass_scale" value="${s * s * s}" />      
         <xacro:property name="inertia_scale" value="${s * s * s * s * s}" />
-       
-        <!-- Mirror across Y axis (1 = right, -1 = left) -->
+        
         <xacro:property name="f_y" value="${mirror_factor}" />
 
-        <!-- Offsets (in meters) -->
         <xacro:property name="palm_offset"  value="0.02" />    
         <xacro:property name="thumb_offset" value="0.00" />    
 
-        <!-- ==================== PALM ==================== -->
         <link name="${prefix}palm">
             <visual>
                 <origin xyz="0 ${palm_offset * f_y} 0" rpy="0 0 0"/>
@@ -27,27 +23,23 @@
             </collision>
             <inertial>
                 <origin xyz="0 0 0"/>
-                <!-- GAP 4 FIX: Increased mass to 0.3kg for stability -->
                 <mass value="${0.3 * mass_scale}"/>
-                <!-- GAP 2 FIX: Inflated inertia floor -->
                 <inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/>
             </inertial>
         </link>
 
-        <!-- ==================== THUMB ==================== -->
         <xacro:property name="thumb_shift" value="0.02" />
 
         <link name="${prefix}thumb_base">
             <visual><origin xyz="${0.02945 * s} ${(-0.06159 * s + thumb_shift) * f_y} ${0.00627 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}thumb_base.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="0 ${thumb_shift * f_y} 0" rpy="0 1.5708 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.02 * s}"/></geometry></collision>
-            <inertial><mass value="${0.012 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}thumb_base_joint" type="revolute">
             <origin xyz="${-0.02945 * s} ${0.06159 * s * f_y} ${-0.00627 * s}" rpy="0 0 0"/>
             <parent link="${prefix}palm"/>
             <child link="${prefix}thumb_base"/>
             <axis xyz="0.297249628842018 ${-0.700414486434294 * f_y} -0.648893061564281"/>
-            <!-- GAP 1 FIX: Reduced effort to 0.5 Nm -->
             <limit lower="0" upper="2.27" effort="0.5" velocity="8"/>
             <dynamics damping="0.1" friction="0.03" armature="0.001"/>
         </joint>
@@ -55,7 +47,7 @@
         <link name="${prefix}thumb_pp">
             <visual><origin xyz="${0.04371 * s} ${(-0.05927 * s + thumb_shift) * f_y} ${0.01030 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}thumb_pp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${-0.01 * s} ${thumb_shift * f_y} 0" rpy="0 1.5708 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.025 * s}"/></geometry></collision>
-            <inertial><mass value="${0.01 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}thumb_pp_joint" type="revolute">
             <origin xyz="${-0.01426 * s} ${-0.00232 * s * f_y} ${-0.00403 * s}" rpy="0 0 0"/>
@@ -69,14 +61,13 @@
         <link name="${prefix}thumb_mp">
             <visual><origin xyz="${0.09026 * s} ${(-0.04514 * s + thumb_shift) * f_y} ${0.02114 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}thumb_mp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${-0.015 * s} ${thumb_shift * f_y} 0" rpy="0 1.5708 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.035 * s}"/></geometry></collision>
-            <inertial><mass value="${0.008 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}thumb_mp_joint" type="revolute">
             <origin xyz="${-0.04655 * s} ${-0.01413 * s * f_y} ${-0.01084 * s}" rpy="0 0 0"/>
             <parent link="${prefix}thumb_pp"/>
             <child link="${prefix}thumb_mp"/>
             <axis xyz="0.284429826078874 ${-0.088618171481011 * f_y} -0.954592318070968"/>
-            <!-- GAP 1 FIX: Reduced effort to 0.3 Nm -->
             <limit lower="0" upper="0.96" effort="0.3" velocity="8"/>
             <dynamics damping="0.1" friction="0.03" armature="0.001"/>
         </joint>
@@ -84,25 +75,23 @@
         <link name="${prefix}thumb_dp">
             <visual><origin xyz="${0.12386 * s} ${(-0.03879 * s + thumb_shift) * f_y} ${0.03068 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}thumb_dp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${-0.01 * s} ${thumb_shift * f_y} 0" rpy="0 1.5708 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.02 * s}"/></geometry></collision>
-            <inertial><mass value="${0.005 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}thumb_dp_joint" type="revolute">
             <origin xyz="${-0.03360 * s} ${-0.00635 * s * f_y} ${-0.00954 * s}" rpy="0 0 0"/>
             <parent link="${prefix}thumb_mp"/>
             <child link="${prefix}thumb_dp"/>
             <axis xyz="0.284429826078874 ${-0.088618171481011 * f_y} -0.954592318070968"/>
-            <!-- GAP 1 FIX: Reduced effort to 0.2 Nm -->
             <limit lower="0" upper="0.68" effort="0.2" velocity="8"/>
             <dynamics damping="0.1" friction="0.03" armature="0.001"/>
         </joint>
 
-        <!-- ==================== INDEX FINGER ==================== -->
         <xacro:property name="index_x_shift" value="0.001825" />
 
         <link name="${prefix}index_pp">
             <visual><origin xyz="${0.03138 * s + index_x_shift} ${-0.13319 * s * f_y} ${-0.02008 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}index_pp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${index_x_shift} ${0.02 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.04 * s}"/></geometry></collision>
-            <inertial><mass value="${0.008 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}index_pp_joint" type="revolute">
             <origin xyz="${-0.03138 * s} ${0.13319 * s * f_y} ${0.02008 * s}" rpy="0 0 0"/>
@@ -116,7 +105,7 @@
         <link name="${prefix}index_mp">
             <visual><origin xyz="${0.03631 * s + index_x_shift} ${-0.17559 * s * f_y} ${-0.02523 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}index_mp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${index_x_shift} ${0.016 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.032 * s}"/></geometry></collision>
-            <inertial><mass value="${0.006 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}index_mp_joint" type="revolute">
             <origin xyz="${-0.00493 * s} ${0.04240 * s * f_y} ${0.00515 * s}" rpy="0 0 0"/>
@@ -130,7 +119,7 @@
         <link name="${prefix}index_dp">
             <visual><origin xyz="${0.04004 * s + index_x_shift} ${-0.20764 * s * f_y} ${-0.02912 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}index_dp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${index_x_shift} ${0.01 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.02 * s}"/></geometry></collision>
-            <inertial><mass value="${0.004 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}index_dp_joint" type="revolute">
             <origin xyz="${-0.00373 * s} ${0.03205 * s * f_y} ${0.00389 * s}" rpy="0 0 0"/>
@@ -141,11 +130,10 @@
             <dynamics damping="0.1" friction="0.03" armature="0.001"/>
         </joint>
 
-        <!-- ==================== MIDDLE FINGER ==================== -->
         <link name="${prefix}middle_pp">
             <visual><origin xyz="${0.00550 * s} ${-0.13548 * s * f_y} ${-0.02188 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}middle_pp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="0 ${0.02 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.04 * s}"/></geometry></collision>
-            <inertial><mass value="${0.008 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}middle_pp_joint" type="revolute">
             <origin xyz="${-0.0055 * s} ${0.13548 * s * f_y} ${0.02188 * s}" rpy="0 0 0"/>
@@ -159,7 +147,7 @@
         <link name="${prefix}middle_mp">
             <visual><origin xyz="${0.00550 * s} ${-0.18213 * s * f_y} ${-0.02761 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}middle_mp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="0 ${0.017 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.034 * s}"/></geometry></collision>
-            <inertial><mass value="${0.006 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}middle_mp_joint" type="revolute">
             <origin xyz="0 ${0.04665 * s * f_y} ${0.00573 * s}" rpy="0 0 0"/>
@@ -173,7 +161,7 @@
         <link name="${prefix}middle_dp">
             <visual><origin xyz="${0.00550 * s} ${-0.21637 * s * f_y} ${-0.03181 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}middle_dp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="0 ${0.01 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.02 * s}"/></geometry></collision>
-            <inertial><mass value="${0.004 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}middle_dp_joint" type="revolute">
             <origin xyz="0 ${0.03424 * s * f_y} ${0.00420 * s}" rpy="0 0 0"/>
@@ -184,13 +172,12 @@
             <dynamics damping="0.1" friction="0.03" armature="0.001"/>
         </joint>
 
-        <!-- ==================== RING FINGER ==================== -->
         <xacro:property name="ring_x_shift" value="-0.001825" />
 
         <link name="${prefix}ring_pp">
             <visual><origin xyz="${-0.02015 * s + ring_x_shift} ${-0.13023 * s * f_y} ${-0.02037 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}ring_pp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${ring_x_shift} ${0.02 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.04 * s}"/></geometry></collision>
-            <inertial><mass value="${0.008 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}ring_pp_joint" type="revolute">
             <origin xyz="${0.02015 * s} ${0.13023 * s * f_y} ${0.02037 * s}" rpy="0 0 0"/>
@@ -204,7 +191,7 @@
         <link name="${prefix}ring_mp">
             <visual><origin xyz="${-0.02508 * s + ring_x_shift} ${-0.17263 * s * f_y} ${-0.02552 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}ring_mp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${ring_x_shift} ${0.016 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.032 * s}"/></geometry></collision>
-            <inertial><mass value="${0.006 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}ring_mp_joint" type="revolute">
             <origin xyz="${0.00493 * s} ${0.04240 * s * f_y} ${0.00515 * s}" rpy="0 0 0"/>
@@ -218,7 +205,7 @@
         <link name="${prefix}ring_dp">
             <visual><origin xyz="${-0.02881 * s + ring_x_shift} ${-0.20468 * s * f_y} ${-0.02941 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}ring_dp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${ring_x_shift} ${0.01 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.02 * s}"/></geometry></collision>
-            <inertial><mass value="${0.004 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}ring_dp_joint" type="revolute">
             <origin xyz="${0.00373 * s} ${0.03205 * s * f_y} ${0.00389 * s}" rpy="0 0 0"/>
@@ -229,13 +216,12 @@
             <dynamics damping="0.1" friction="0.03" armature="0.001"/>
         </joint>
 
-        <!-- ==================== PINKY FINGER ==================== -->
         <xacro:property name="pinky_x_shift" value="-0.0044225" />
 
         <link name="${prefix}pinky_pp">
             <visual><origin xyz="${-0.04565 * s + pinky_x_shift} ${-0.11920 * s * f_y} ${-0.01504 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}pinky_pp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${pinky_x_shift} ${0.018 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.037 * s}"/></geometry></collision>
-            <inertial><mass value="${0.008 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}pinky_pp_joint" type="revolute">
             <origin xyz="${0.04565 * s} ${0.11920 * s * f_y} ${0.01504 * s}" rpy="0 0 0"/>
@@ -249,7 +235,7 @@
         <link name="${prefix}pinky_mp">
             <visual><origin xyz="${-0.05536 * s + pinky_x_shift} ${-0.15676 * s * f_y} ${-0.01904 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}pinky_mp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${pinky_x_shift} ${0.013 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.027 * s}"/></geometry></collision>
-            <inertial><mass value="${0.006 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}pinky_mp_joint" type="revolute">
             <origin xyz="${0.00971 * s} ${0.03756 * s * f_y} ${0.00400 * s}" rpy="0 0 0"/>
@@ -263,7 +249,7 @@
         <link name="${prefix}pinky_dp">
             <visual><origin xyz="${-0.06245 * s + pinky_x_shift} ${-0.18421 * s * f_y} ${-0.02196 * s}" rpy="0 0 0"/><geometry><mesh filename="${mesh_dir}/${prefix}pinky_dp.stl" scale="${s} ${s} ${s}"/></geometry></visual>
             <collision><origin xyz="${pinky_x_shift} ${0.01 * s * f_y} 0" rpy="1.5708 0 0"/><geometry><cylinder radius="${0.01 * s}" length="${0.02 * s}"/></geometry></collision>
-            <inertial><mass value="${0.004 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
+            <inertial><mass value="${0.02 * mass_scale}"/><inertia ixx="${0.0001 * inertia_scale}" ixy="0" ixz="0" iyy="${0.0001 * inertia_scale}" iyz="0" izz="${0.0001 * inertia_scale}"/></inertial>
         </link>
         <joint name="${prefix}pinky_dp_joint" type="revolute">
             <origin xyz="${0.00709 * s} ${0.02745 * s * f_y} ${0.00292 * s}" rpy="0 0 0"/>

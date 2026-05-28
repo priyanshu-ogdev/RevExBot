@@ -700,7 +700,6 @@
     <limit effort="30" lower="-3.141" upper="3.141" velocity="8"/>
     <dynamics armature="0.001" damping="0.0282528" friction="0.08"/>
   </joint>
-  <!-- ==================== PALM ==================== -->
   <link name="rh_palm">
     <visual>
       <origin rpy="0 0 0" xyz="0 0.02 0"/>
@@ -716,9 +715,7 @@
     </collision>
     <inertial>
       <origin xyz="0 0 0"/>
-      <!-- GAP 4 FIX: Increased mass to 0.3kg for stability -->
       <mass value="0.3"/>
-      <!-- GAP 2 FIX: Inflated inertia floor -->
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -736,7 +733,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.012"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -745,7 +742,6 @@
     <parent link="rh_palm"/>
     <child link="rh_thumb_base"/>
     <axis xyz="0.297249628842018 -0.700414486434294 -0.648893061564281"/>
-    <!-- GAP 1 FIX: Reduced effort to 0.5 Nm -->
     <limit effort="0.5" lower="0" upper="2.27" velocity="8"/>
     <dynamics armature="0.001" damping="0.1" friction="0.03"/>
   </joint>
@@ -763,7 +759,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.01"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -789,7 +785,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.008"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -798,7 +794,6 @@
     <parent link="rh_thumb_pp"/>
     <child link="rh_thumb_mp"/>
     <axis xyz="0.284429826078874 -0.088618171481011 -0.954592318070968"/>
-    <!-- GAP 1 FIX: Reduced effort to 0.3 Nm -->
     <limit effort="0.3" lower="0" upper="0.96" velocity="8"/>
     <dynamics armature="0.001" damping="0.1" friction="0.03"/>
   </joint>
@@ -816,7 +811,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.005"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -825,7 +820,6 @@
     <parent link="rh_thumb_mp"/>
     <child link="rh_thumb_dp"/>
     <axis xyz="0.284429826078874 -0.088618171481011 -0.954592318070968"/>
-    <!-- GAP 1 FIX: Reduced effort to 0.2 Nm -->
     <limit effort="0.2" lower="0" upper="0.68" velocity="8"/>
     <dynamics armature="0.001" damping="0.1" friction="0.03"/>
   </joint>
@@ -843,7 +837,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.008"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -869,7 +863,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.006"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -895,7 +889,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.004"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -907,7 +901,6 @@
     <limit effort="0.2" lower="0" upper="0.68" velocity="8"/>
     <dynamics armature="0.001" damping="0.1" friction="0.03"/>
   </joint>
-  <!-- ==================== MIDDLE FINGER ==================== -->
   <link name="rh_middle_pp">
     <visual>
       <origin rpy="0 0 0" xyz="0.0055 -0.13548 -0.02188"/>
@@ -922,7 +915,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.008"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -948,7 +941,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.006"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -974,7 +967,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.004"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1000,7 +993,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.008"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1026,7 +1019,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.006"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1052,7 +1045,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.004"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1078,7 +1071,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.008"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1104,7 +1097,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.006"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1130,7 +1123,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.004"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1142,7 +1135,6 @@
     <limit effort="0.2" lower="0" upper="0.68" velocity="8"/>
     <dynamics armature="0.001" damping="0.1" friction="0.03"/>
   </joint>
-  <!-- ==================== PALM ==================== -->
   <link name="lh_palm">
     <visual>
       <origin rpy="0 0 0" xyz="0 -0.02 0"/>
@@ -1158,9 +1150,7 @@
     </collision>
     <inertial>
       <origin xyz="0 0 0"/>
-      <!-- GAP 4 FIX: Increased mass to 0.3kg for stability -->
       <mass value="0.3"/>
-      <!-- GAP 2 FIX: Inflated inertia floor -->
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1178,7 +1168,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.012"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1187,7 +1177,6 @@
     <parent link="lh_palm"/>
     <child link="lh_thumb_base"/>
     <axis xyz="0.297249628842018 0.700414486434294 -0.648893061564281"/>
-    <!-- GAP 1 FIX: Reduced effort to 0.5 Nm -->
     <limit effort="0.5" lower="0" upper="2.27" velocity="8"/>
     <dynamics armature="0.001" damping="0.1" friction="0.03"/>
   </joint>
@@ -1205,7 +1194,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.01"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1231,7 +1220,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.008"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1240,7 +1229,6 @@
     <parent link="lh_thumb_pp"/>
     <child link="lh_thumb_mp"/>
     <axis xyz="0.284429826078874 0.088618171481011 -0.954592318070968"/>
-    <!-- GAP 1 FIX: Reduced effort to 0.3 Nm -->
     <limit effort="0.3" lower="0" upper="0.96" velocity="8"/>
     <dynamics armature="0.001" damping="0.1" friction="0.03"/>
   </joint>
@@ -1258,7 +1246,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.005"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1267,7 +1255,6 @@
     <parent link="lh_thumb_mp"/>
     <child link="lh_thumb_dp"/>
     <axis xyz="0.284429826078874 0.088618171481011 -0.954592318070968"/>
-    <!-- GAP 1 FIX: Reduced effort to 0.2 Nm -->
     <limit effort="0.2" lower="0" upper="0.68" velocity="8"/>
     <dynamics armature="0.001" damping="0.1" friction="0.03"/>
   </joint>
@@ -1285,7 +1272,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.008"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1311,7 +1298,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.006"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1337,7 +1324,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.004"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1349,7 +1336,6 @@
     <limit effort="0.2" lower="0" upper="0.68" velocity="8"/>
     <dynamics armature="0.001" damping="0.1" friction="0.03"/>
   </joint>
-  <!-- ==================== MIDDLE FINGER ==================== -->
   <link name="lh_middle_pp">
     <visual>
       <origin rpy="0 0 0" xyz="0.0055 0.13548 -0.02188"/>
@@ -1364,7 +1350,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.008"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1390,7 +1376,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.006"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1416,7 +1402,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.004"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1442,7 +1428,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.008"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1468,7 +1454,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.006"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1494,7 +1480,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.004"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1520,7 +1506,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.008"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1546,7 +1532,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.006"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
@@ -1572,7 +1558,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.004"/>
+      <mass value="0.02"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
