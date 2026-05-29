@@ -1,4 +1,3 @@
-# cfg/train/skill_combat_amp.yaml
 params:
   seed: 42
   algo:
@@ -7,20 +6,18 @@ params:
     name: continuous_amp_logstd
   network:
     name: amp_actor_critic
-    separate: True # SOTA: Asymmetric
-    
+    separate: True
     mlp:
       units: [512, 256, 128] 
       activation: elu
-      
     value:
       units: [512, 256, 128]
       activation: elu
   
   amp_config:
-    replay_buffer_size: 500000   
-    expert_batch_size: 8192      # Strong Discriminator (>= minibatch_size)
-    discriminator_reward_scale: 2.0 
+    replay_buffer_size: 1048576   
+    expert_batch_size: 8192        # 🚨 ADJUSTED: Prevents discriminator memorization on early datasets
+    discriminator_reward_scale: 2.0 # 🚨 BALANCED: Competes with custom MDP rewards without drowning them
     discriminator_network:
       units: [1024, 512]
       activation: relu
@@ -31,23 +28,41 @@ params:
     device: 'cuda:0'
     mixed_precision: True
     ppo: True
+
+    clip_value: True
+    critic_coef: 1.0
+    clip_actions: True
     
-    # SOTA Normalization & Bounds
     normalize_input: True
     normalize_value: True
     value_bootstrap: True
-    bounds_loss_coef: 0.0005 # Prevents Actuator Meltdown
+    bounds_loss_coef: 0.0005 
     
     optimizer: adam 
-    learning_rate: 1e-4      
+    learning_rate: 5e-5      
+    min_lr: 1e-6             
     weight_decay: 0.001
+    lr_schedule: adaptive
+    
+    amp_optimizer: sgd
+    amp_momentum: 0.9
+    amp_lr: 1e-3             # 🚨 FIXED: SGD requires higher LR magnitude
+    amp_lr_schedule: fixed   # 🚨 FIXED: Prevents discriminator oscillation
     
     gamma: 0.99
     tau: 0.95
-    kl_threshold: 0.015 
-    max_epochs: 5000
+    kl_threshold: 0.012 
+    max_epochs: 6000
+    save_best_after: 200
+    save_frequency: 100
     
-    horizon_length: 32 
-    minibatch_size: 4096         
+    grad_norm: 1.0
+    entropy_coef: 0.005
+    entropy_coef_schedule: [(0, 0.005), (1500, 0.001)]
+    truncate_grads: True
+    e_clip: 0.2
+    
+    num_actors: 16384
+    horizon_length: 64
+    minibatch_size: 65536    
     mini_epochs: 6
-    seq_len: 4

@@ -1,8 +1,11 @@
 # cfg/env_config.yaml
-# DISTRIBUTED FACTORY CONFIGURATION (VISION + SIMULATION)
+# THE MASTER FORGE CONFIGURATION (RTX 6000 ADA)
 
 system:
-  active_hardware: "dgx_spark" # Designate 'dgx_spark' for RL, '4070_ti' for Vision
+  active_hardware: "rtx_6000_ada"
+  # 🚨 STRICT MEMORY CONTROL: Forces PyTorch to release cached memory back to the OS 
+  # before handing the GPU from the Vision Daemon to Isaac Lab.
+  force_vram_flush_between_phases: true
 
 cluster_paths:
   drop_zone: "raw_media/"                  # External ingest for .mp4 files
@@ -19,24 +22,25 @@ evaluation:
 
 vlm_orchestration:
   model_id: "Qwen/Qwen2.5-VL-3B-Instruct"
-  max_frames_per_video: 8
+  # 🚨 ADA UPGRADE: Doubled temporal resolution. 48GB VRAM easily absorbs 
+  # the massive KV cache required for 16-frame kinematic extraction.
+  max_frames_per_video: 16 
   context_window: 8192
 
 profiles:
-  4070_ti:
-    role: "vision_daemon_and_retargeting"
-    max_vram_gb: 16
+  rtx_6000_ada:
+    role: "unified_master_forge"
+    max_vram_gb: 48
+    system_ram_gb: 128
     use_mixed_precision: true   
-    intra_op_threads: 4
-    
-  dgx_spark:
-    role: "isaac_lab_simulation_and_skrl"
-    max_vram_gb: 128
-    use_mixed_precision: true
-    intra_op_threads: 16
+    # 🚨 SYSTEM SCALE: High thread count to prevent CPU bottlenecking 
+    # when caching 2M transition buffers into the 128GB System RAM.
+    intra_op_threads: 24 
 
 moe_architecture:
   base_locomotion_policy: "data/weights/expert_loco_v1.pth"
   base_agile_policy: "data/weights/expert_agile_v1.pth"
-  router_distillation_epochs: 50
-  router_save_path: "runs/phase3/router/nn/" # SKRL output directory
+  # 🚨 ROUTER STABILIZATION: Increased distillation epochs. With 16k envs, 
+  # the SKRL router needs slightly more time to cleanly balance expert gating.
+  router_distillation_epochs: 100 
+  router_save_path: "runs/phase3/router/nn/"

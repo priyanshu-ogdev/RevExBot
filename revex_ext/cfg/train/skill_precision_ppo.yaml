@@ -1,12 +1,12 @@
 params:
-  seed: 42
+  seed: 44
   algo:
     name: a2c_continuous
   model:
     name: continuous_a2c_logstd
   network:
     name: actor_critic
-    separate: True # SOTA: Asymmetric
+    separate: True 
     
     mlp:
       units: [512, 256, 128] 
@@ -23,27 +23,39 @@ params:
     mixed_precision: True
     ppo: True
     
-    # SOTA Normalization & Bounds
     normalize_input: True
     normalize_value: True
     value_bootstrap: True
     clip_actions: True
-    bounds_loss_coef: 0.0001 
+    bounds_loss_coef: 0.0005 
     
-    optimizer: adam
+    # 🚨 PPO SAFEGUARDS: Prevents Value network explosions during crush-penalties
+    clip_value: True
+    critic_coef: 1.0
+    
+    # 🚨 HAZARD GENERALIZATION: SGD + Momentum prevents overfitting to sim-meshes
+    optimizer: sgd 
+    learning_rate: 1e-3      
+    momentum: 0.9
+    weight_decay: 0.001
     lr_schedule: adaptive
-    learning_rate: 5e-5
-    weight_decay: 0.005
+    min_lr: 1e-6             
     
-    # GAP 133 FIX: Increased KL Threshold for faster convergence
-    kl_threshold: 0.02
-    score_to_win: 50000
-    max_epochs: 4000
-    save_best_after: 500
+    gamma: 0.99
+    tau: 0.95
+    kl_threshold: 0.012      
+    max_epochs: 6000         
+    save_best_after: 200
+    save_frequency: 100
     
-    entropy_coef: 0.01        
+    grad_norm: 1.0
+    entropy_coef: 0.005
+    entropy_coef_schedule: [(0, 0.005), (1500, 0.0001)] 
+    truncate_grads: True
+    e_clip: 0.2
     
+    # 🚨 ADA SCALE ALIGNMENT
+    num_actors: 16384
     horizon_length: 64
-    minibatch_size: 4096       
-    mini_epochs: 5
-    seq_len: 4
+    minibatch_size: 65536    
+    mini_epochs: 6

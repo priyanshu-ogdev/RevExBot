@@ -1,25 +1,25 @@
-# envs/skills/revex_loco_cfg.py
+# revex_ext/envs/loco/revex_loco_cfg.py
 import math
 from dataclasses import MISSING
 
 # Isaac Lab core imports
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
 from omni.isaac.lab.sim import SimulationCfg, PhysxCfg
-from omni.isaac.lab.scene import InteractiveSceneCfg
-from omni.isaac.lab.managers import RewardTermCfg, ObservationGroupCfg, ObservationTermCfg, EventTermCfg, SceneEntityCfg, CurriculumTermCfg, TerminationTermCfg
+from omni.isaac.lab.managers import (
+    RewardTermCfg, ObservationGroupCfg, ObservationTermCfg, 
+    EventTermCfg, SceneEntityCfg, CurriculumTermCfg, TerminationTermCfg
+)
 from omni.isaac.lab.utils import configclass
-
-# Asset and Sensor Imports
-from omni.isaac.lab.assets import ArticulationCfg
-from omni.isaac.lab.sensors import ContactSensorCfg, ImuSensorCfg
-from omni.isaac.lab.terrains import TerrainImporterCfg
-from omni.isaac.lab.sim.spawns import UsdFileCfg
-
 import omni.isaac.lab.envs.mdp as mdp
-import omni.isaac.lab.sim as sim_utils
 
-# 🚨 GAP 119 FIX: Import our optimized custom MDP
-from .. import custom_mdp 
+# MoE Parity & Custom MDP Imports
+from envs.skills.revex_scene_cfg import RevExCombatSceneCfg
+from .. import custom_mdp
+
+@configclass
+class RevExLocoSceneCfg(RevExCombatSceneCfg):
+    """Inherits all MoE sensors/targets to prevent KeyError, keeps terrain flat."""
+    pass
 
 @configclass
 class RevExCommandsCfg:
@@ -36,7 +36,6 @@ class RevExCommandsCfg:
 
 @configclass
 class RevExActionsCfg:
-    # 🚨 Effort Control: Perfectly matches Phase 2/3 for weight transfer
     joint_efforts = mdp.JointEffortActionCfg(
         asset_name="robot",
         joint_names=[".*"], 
@@ -54,7 +53,7 @@ class RevExCurriculumCfg:
             "parameter": "lin_vel_x",
             "min": -0.5, "max": 0.5,       
             "final_min": -2.0, "final_max": 2.0, 
-            "num_steps": 10000             
+            "num_steps": 2500
         }
     )
 
@@ -65,199 +64,96 @@ class RevExRewardsCfg:
     tracking_ang_vel = RewardTermCfg(func=mdp.track_ang_vel_z_exp, weight=0.75, params={"std": 0.25})
     alive_bonus = RewardTermCfg(func=mdp.is_alive, weight=0.1)
     
-    # 2. Smoothness & True Mechanical Power
-    action_rate_penalty = RewardTermCfg(func=mdp.action_rate_l2, weight=-0.05)
-    joint_accel_penalty = RewardTermCfg(func=mdp.joint_accel_l2, weight=-0.01)
+    # 2. Asymmetric Effort (Lazy Upper Body, Stiff Lower Body)
+    action_rate_legs = RewardTermCfg(func=mdp.action_rate_l2, weight=-0.02, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_.*", ".*_knee_.*", ".*_ankle_.*"])})
+    action_rate_torso = RewardTermCfg(func=mdp.action_rate_l2, weight=-0.1, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_.*", ".*_elbow_.*", "waist_yaw_joint"])})
+    action_rate_hands = RewardTermCfg(func=mdp.action_rate_l2, weight=-0.2, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wrist_.*", ".*_thumb_.*", ".*_index_.*", ".*_middle_.*", ".*_ring_.*", ".*_pinky_.*"])})
     
-    # 🚨 GAP 119 FIX: Re-activated True Power Consumption
-    energy_cost = RewardTermCfg(
-        func=custom_mdp.power_consumption, 
-        weight=-0.0005, 
-        params={"asset_cfg": SceneEntityCfg("robot")}
-    )
+    # 3. Full-Body Instincts
+    base_ang_vel_penalty = RewardTermCfg(func=mdp.base_ang_vel_l2, weight=-0.5, params={"asset_cfg": SceneEntityCfg("robot")})
+    hand_posture_lock = RewardTermCfg(func=mdp.joint_pos_target_l2, weight=-0.8, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_thumb_.*", ".*_index_.*", ".*_middle_.*", ".*_ring_.*", ".*_pinky_.*"]), "target": 0.35})
     
-    # 3. Humanistic Gait Shaping
-    knee_compliance = RewardTermCfg(
-        func=mdp.joint_pos_target_l2, 
-        weight=0.5, 
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_knee_joint"]), "target": 0.15}
-    )
+    # 4. Hardware Protection & Efficiency
+    energy_cost = RewardTermCfg(func=custom_mdp.power_consumption, weight=-0.0005, params={"asset_cfg": SceneEntityCfg("robot")})
+    joint_limits = RewardTermCfg(func=mdp.joint_pos_limits, weight=-0.2, params={"asset_cfg": SceneEntityCfg("robot")})
+    foot_slip = RewardTermCfg(func=mdp.foot_slip, weight=-0.3, params={"asset_cfg": SceneEntityCfg("robot", body_names=[".*ankle_roll_link"]), "sensor_cfg": SceneEntityCfg("contact_forces"), "threshold": 0.1})
     
-    # 🚨 GAP 119 FIX: Re-activated Contralateral Arm Swing
-    arm_swing = RewardTermCfg(
-        func=custom_mdp.arm_swing_symmetry, 
-        weight=0.2, 
-        params={
-            "left_arm_cfg": SceneEntityCfg("robot", joint_names=["left_shoulder_pitch_joint"]),
-            "right_arm_cfg": SceneEntityCfg("robot", joint_names=["right_shoulder_pitch_joint"]),
-            "left_leg_cfg": SceneEntityCfg("robot", joint_names=["left_hip_pitch_joint"]),
-            "right_leg_cfg": SceneEntityCfg("robot", joint_names=["right_hip_pitch_joint"]),
-        }
-    )
-    
-    foot_slip = RewardTermCfg(
-        func=mdp.foot_slip,
-        weight=-0.2,
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=[".*ankle_roll_link"]), 
-            "sensor_cfg": SceneEntityCfg("contact_forces"), 
-            "threshold": 0.1
-        }
-    )
+    # 5. Gait Shaping
+    knee_compliance = RewardTermCfg(func=mdp.joint_pos_target_l2, weight=0.3, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_knee_joint"]), "target": 0.15})
+    arm_swing = RewardTermCfg(func=custom_mdp.arm_swing_symmetry, weight=0.2, params={
+        "left_arm_cfg": SceneEntityCfg("robot", joint_names=["left_shoulder_pitch_joint"]),
+        "right_arm_cfg": SceneEntityCfg("robot", joint_names=["right_shoulder_pitch_joint"]),
+        "left_leg_cfg": SceneEntityCfg("robot", joint_names=["left_hip_pitch_joint"]),
+        "right_leg_cfg": SceneEntityCfg("robot", joint_names=["right_hip_pitch_joint"]),
+    })
 
 @configclass
 class RevExObservationsCfg:
     @configclass
     class PolicyCfg(ObservationGroupCfg):
-        projected_gravity = ObservationTermCfg(func=mdp.projected_gravity, noise=mdp.add_uniform_noise, noise_params={"range": [-0.01, 0.01]})
-        joint_pos = ObservationTermCfg(func=mdp.joint_pos_rel, noise=mdp.add_uniform_noise, noise_params={"range": [-0.01, 0.01]})
+        # Base Loco Proprioception
+        projected_gravity = ObservationTermCfg(func=mdp.projected_gravity, noise=mdp.add_uniform_noise, noise_params={"range": [-0.02, 0.02]})
+        joint_pos = ObservationTermCfg(func=mdp.joint_pos_rel, noise=mdp.add_uniform_noise, noise_params={"range": [-0.02, 0.02]})
         joint_vel = ObservationTermCfg(func=mdp.joint_vel_rel, noise=mdp.add_uniform_noise, noise_params={"range": [-0.1, 0.1]})
-        actions = ObservationTermCfg(func=mdp.last_action)
+        last_action = ObservationTermCfg(func=mdp.last_action, noise=mdp.add_uniform_noise, noise_params={"range": [-0.01, 0.01]})
+        
         imu_lin_acc = ObservationTermCfg(func=mdp.imu_lin_acc, params={"sensor_cfg": SceneEntityCfg("imu_sensor")})
         imu_ang_vel = ObservationTermCfg(func=mdp.imu_ang_vel, params={"sensor_cfg": SceneEntityCfg("imu_sensor")})
         velocity_commands = ObservationTermCfg(func=mdp.generated_commands, params={"command_name": "base_velocity"})
+        
+        # =====================================================================
+        # 🚨 UNIVERSAL MOE PARITY SINK (scale=0.0)
+        # Zeros out Combat/Dance arrays to guarantee perfect 184-float matrix shape parity
+        # =====================================================================
+        latent_style = ObservationTermCfg(func=custom_mdp.get_latent_style_vector, scale=0.0)
+        latent_style_delta = ObservationTermCfg(func=custom_mdp.get_latent_style_delta, scale=0.0)
+        multi_target_vectors = ObservationTermCfg(func=custom_mdp.get_k_nearest_threat_vectors, params={"k": 5}, scale=0.0)
+        
+        target_pos = ObservationTermCfg(func=mdp.target_pos_rel, params={"asset_cfg": SceneEntityCfg("target_object")}, scale=0.0) 
+        target_orient = ObservationTermCfg(func=mdp.target_quat_rel, params={"asset_cfg": SceneEntityCfg("target_object")}, scale=0.0) 
+        object_lin_vel = ObservationTermCfg(func=mdp.object_lin_vel, params={"asset_cfg": SceneEntityCfg("target_object")}, default_val=0.0, scale=0.0)
+        wrist_force = ObservationTermCfg(func=mdp.net_forces_and_torques, params={"sensor_cfg": SceneEntityCfg("wrist_contact_sensor")}, default_val=0.0, scale=0.0)
+        
+        # Combat's 360-lidar and height scanners padded to zero
+        combat_lidar_pad = ObservationTermCfg(func=mdp.ray_cast_sensor_distances, params={"sensor_cfg": SceneEntityCfg("spatial_awareness_raycaster")}, default_val=3.0, scale=0.0)
+        height_scan_pad = ObservationTermCfg(func=mdp.ray_cast_sensor_distances, params={"sensor_cfg": SceneEntityCfg("height_scanner")}, default_val=1.5, scale=0.0)
 
         def __post_init__(self):
             self.enable_corruption = True
             self.concatenate_terms = True
+            self.history_length = 5 
 
     @configclass
     class CriticCfg(ObservationGroupCfg):
-        joint_pos = ObservationTermCfg(func=mdp.joint_pos_rel)
-        joint_vel = ObservationTermCfg(func=mdp.joint_vel_rel)
-        projected_gravity = ObservationTermCfg(func=mdp.projected_gravity)
-        actions = ObservationTermCfg(func=mdp.last_action)
-        velocity_commands = ObservationTermCfg(func=mdp.generated_commands, params={"command_name": "base_velocity"})
-        
-        true_base_lin_vel = ObservationTermCfg(func=mdp.base_lin_vel)
-        true_base_ang_vel = ObservationTermCfg(func=mdp.base_ang_vel)
+        policy_obs = ObservationTermCfg(func=mdp.obs_group, params={"group_name": "policy"})
+        true_base_lin_vel = ObservationTermCfg(func=mdp.base_lin_vel, params={"asset_cfg": SceneEntityCfg("robot")})
+        true_base_ang_vel = ObservationTermCfg(func=mdp.base_ang_vel, params={"asset_cfg": SceneEntityCfg("robot")})
         friction_coeffs = ObservationTermCfg(func=mdp.body_friction_coeffs, params={"asset_cfg": SceneEntityCfg("robot")})
 
         def __post_init__(self):
             self.enable_corruption = False
             self.concatenate_terms = True
+            self.history_length = 0
 
     policy: PolicyCfg = PolicyCfg()
     critic: CriticCfg = CriticCfg()
-
+    
 @configclass
 class RevExEventsCfg:
-    randomize_friction = EventTermCfg(
-        func=mdp.randomize_rigid_body_material,
-        mode="reset",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*"), 
-            "static_friction_range": [0.7, 1.3], 
-            "operation": "scale"
-        }
-    )
-    randomize_mass = EventTermCfg(
-        func=mdp.randomize_rigid_body_mass,
-        mode="reset",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*"), 
-            "mass_distribution_params": [0.9, 1.1], 
-            "operation": "scale"
-        }
-    )
+    randomize_friction = EventTermCfg(func=mdp.randomize_rigid_body_material, mode="reset", params={"asset_cfg": SceneEntityCfg("robot", body_names=".*"), "static_friction_range": [0.7, 1.3], "operation": "scale"})
+    randomize_mass = EventTermCfg(func=mdp.randomize_rigid_body_mass, mode="reset", params={"asset_cfg": SceneEntityCfg("robot", body_names=".*"), "mass_distribution_params": [0.9, 1.1], "operation": "scale"})
 
 @configclass
 class RevExTerminationsCfg:
-    base_orientation = TerminationTermCfg(
-        func=mdp.bad_orientation, 
-        params={"limit_angle": 0.7}
-    )
-    joint_limits = TerminationTermCfg(
-        func=mdp.joint_pos_out_of_limit, 
-        params={"asset_cfg": SceneEntityCfg("robot"), "threshold": 0.95}
-    )
-    base_height = TerminationTermCfg(
-        func=mdp.base_height_below_threshold,
-        params={"asset_cfg": SceneEntityCfg("robot"), "threshold": 0.3}
-    )
-
-@configclass
-class RevExSceneCfg(InteractiveSceneCfg):
-    num_envs = 2048
-    env_spacing = 2.0
-    
-    terrain = TerrainImporterCfg(prim_path="/World/ground", terrain_type="plane")
-    
-    robot = ArticulationCfg(
-        prim_path="{ENV_REGEX_NS}/Robot",
-        spawn=UsdFileCfg(
-            usd_path="assets/usd/revexbot.usd",
-            activate_contact_sensors=True,
-            rigid_props=sim_utils.RigidBodyPropertiesCfg(
-                disable_gravity=False,
-                retain_accelerations=False,
-                linear_damping=0.0,
-                angular_damping=0.0,
-                max_linear_velocity=1000.0,
-                max_angular_velocity=1000.0,
-                max_depenetration_velocity=1.0,
-            ),
-            articulation_props=sim_utils.ArticulationRootPropertiesCfg(
-                enabled_self_collisions=False,
-                solver_position_iteration_count=4,
-                solver_velocity_iteration_count=0,
-            ),
-        ),
-        init_state=ArticulationCfg.InitialStateCfg(
-            pos=(0.0, 0.0, 0.63),
-            joint_pos={
-                "left_hip_pitch_joint": 0.0,
-                "left_knee_joint": 0.3,
-                "left_ankle_pitch_joint": -0.15,
-                "right_hip_pitch_joint": 0.0,
-                "right_knee_joint": 0.3,
-                "right_ankle_pitch_joint": -0.15,
-                "waist_yaw_joint": 0.0,
-                "left_shoulder_pitch_joint": 0.2,
-                "left_elbow_joint": 0.5,
-                "right_shoulder_pitch_joint": 0.2,
-                "right_elbow_joint": 0.5,
-                ".*_wrist_.*": 0.0,
-                ".*_thumb_.*": 0.0,
-                ".*_index_.*": 0.0,
-                ".*_middle_.*": 0.0,
-                ".*_ring_.*": 0.0,
-                ".*_pinky_.*": 0.0,
-            },
-        ),
-        actuators={
-            "legs": mdp.ImplicitActuatorCfg(
-                joint_names_expr=[".*_hip_.*", ".*_knee_.*", ".*_ankle_.*", "waist_yaw_joint"],
-                stiffness=150.0,
-                damping=5.0,
-                armature=0.01,
-            ),
-            "arms": mdp.ImplicitActuatorCfg(
-                joint_names_expr=[".*_shoulder_.*", ".*_elbow_.*", ".*_wrist_.*"],
-                stiffness=40.0,
-                damping=1.5,
-                armature=0.005,
-            ),
-            "hands": mdp.ImplicitActuatorCfg(
-                joint_names_expr=[".*_thumb_.*", ".*_index_.*", ".*_middle_.*", ".*_ring_.*", ".*_pinky_.*"],
-                stiffness=3.0,
-                damping=0.15,
-                armature=0.001,
-            ),
-        },
-    )
-
-    contact_forces = ContactSensorCfg(
-        prim_path="{ENV_REGEX_NS}/Robot/.*_toe_link|{ENV_REGEX_NS}/Robot/.*ankle_roll_link", 
-        history_length=3,
-        filter_prim_paths_expr=["{ENV_REGEX_NS}/Robot"]
-    )
-    imu_sensor = ImuSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/imu_in_pelvis")
+    base_orientation = TerminationTermCfg(func=mdp.bad_orientation, params={"limit_angle": 0.7})
+    joint_limits = TerminationTermCfg(func=mdp.joint_pos_out_of_limit, params={"asset_cfg": SceneEntityCfg("robot"), "threshold": 0.95})
+    base_height = TerminationTermCfg(func=mdp.base_height_below_threshold, params={"asset_cfg": SceneEntityCfg("robot"), "threshold": 0.3})
 
 @configclass
 class RevExLocoCfg(ManagerBasedRLEnvCfg):
-    # 🚨 GAP 120 FIX: Declare managers safely at the class level
-    scene: RevExSceneCfg = RevExSceneCfg(num_envs=2048, env_spacing=2.0)
+    # 🚨 FIXED: Inherits Universal MoE Scene instead of standalone duplicate
+    scene: RevExLocoSceneCfg = RevExLocoSceneCfg(num_envs=16384, env_spacing=2.0)
+    
     actions: RevExActionsCfg = RevExActionsCfg()
     commands: RevExCommandsCfg = RevExCommandsCfg()
     curriculum: RevExCurriculumCfg = RevExCurriculumCfg()
@@ -276,8 +172,10 @@ class RevExLocoCfg(ManagerBasedRLEnvCfg):
                 bounce_threshold_velocity=0.2,
                 friction_offset_threshold=0.04,
                 friction_correlation_distance=0.025,
-                gpu_max_rigid_contact_count=2**24,
-                gpu_max_rigid_patch_count=2**24
+                gpu_max_rigid_contact_count=2**26,
+                gpu_max_rigid_patch_count=2**26,
+                enable_stabilization=True,
+                gpu_found_lost_pairs_capacity=2**24
             )
         )
         self.is_asymmetric = True

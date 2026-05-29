@@ -1,25 +1,23 @@
 params:
-  seed: 42
+  seed: 43
   algo:
     name: amp_continuous 
   model:
     name: continuous_amp_logstd
   network:
     name: amp_actor_critic
-    separate: True # SOTA: Asymmetric
-    
+    separate: True
     mlp:
       units: [512, 256, 128] 
       activation: elu
-      
     value:
       units: [512, 256, 128]
       activation: elu
   
   amp_config:
-    replay_buffer_size: 500000   
-    expert_batch_size: 8192      # GAP 132 FIX: Increased for stricter Discriminator
-    discriminator_reward_scale: 1.5 
+    replay_buffer_size: 1048576   
+    expert_batch_size: 8192        # 🚨 ADJUSTED: Matches combat for MoE parity
+    discriminator_reward_scale: 2.0 # 🚨 BALANCED: Ensures rhythm/formation kinematics dominate
     discriminator_network:
       units: [1024, 512]
       activation: relu
@@ -31,7 +29,10 @@ params:
     mixed_precision: True
     ppo: True
     
-    # SOTA Normalization & Bounds
+    clip_value: True
+    critic_coef: 1.0
+    clip_actions: True
+    
     normalize_input: True
     normalize_value: True
     value_bootstrap: True
@@ -39,13 +40,29 @@ params:
     
     optimizer: adam 
     learning_rate: 5e-5      
+    min_lr: 1e-6             
     weight_decay: 0.001
+    lr_schedule: adaptive
+    
+    amp_optimizer: sgd
+    amp_momentum: 0.9
+    amp_lr: 1e-3             # 🚨 FIXED: SGD stability scale
+    amp_lr_schedule: fixed   
     
     gamma: 0.99
     tau: 0.95
-    kl_threshold: 0.008      
-    max_epochs: 6000         
-    horizon_length: 32       
-    minibatch_size: 4096     
-    mini_epochs: 4
-    seq_len: 4
+    kl_threshold: 0.012 
+    max_epochs: 6000
+    save_best_after: 200
+    save_frequency: 100
+    
+    grad_norm: 1.0
+    entropy_coef: 0.005
+    entropy_coef_schedule: [(0, 0.005), (1500, 0.001)]
+    truncate_grads: True
+    e_clip: 0.2
+    
+    num_actors: 16384
+    horizon_length: 64
+    minibatch_size: 65536    
+    mini_epochs: 6

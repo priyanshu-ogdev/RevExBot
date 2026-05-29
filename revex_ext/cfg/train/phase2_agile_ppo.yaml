@@ -6,7 +6,7 @@ params:
     name: continuous_a2c_logstd
   network:
     name: actor_critic
-    separate: True # SOTA: Asymmetric Critic
+    separate: True 
     space:
       continuous:
         mu_activation: None
@@ -39,32 +39,38 @@ params:
     clip_actions: True
     bounds_loss_coef: 0.0001
     
-    num_actors: 2048
+    num_actors: 16384 
     reward_shaper:
       scale_value: 1.0
     normalize_advantage: True
     
-    gamma: 0.99
-    tau: 0.95
-    
-    optimizer: adam
+    # 🚨 PATCHED: Horizon tightened to prioritize immediate impact stabilization
+    gamma: 0.99 
+    tau: 0.95    
     learning_rate: 1e-4
-    weight_decay: 0.001  
+    min_lr: 1e-6       
     lr_schedule: adaptive
     
-    kl_threshold: 0.008 # Tight for smooth recovery
-    score_to_win: 35000
-    max_epochs: 3000           
-    save_best_after: 200
-    save_frequency: 100
+    optimizer: adam
+    weight_decay: 0.001  
+    kl_threshold: 0.008  
+    score_to_win: 25000
+    max_epochs: 2500           
+    save_best_after: 100
+    save_frequency: 50
     
     grad_norm: 1.0
-    entropy_coef: 0.015 # Higher for exploration of recovery
+    entropy_coef: 0.01
+    # Prolonged exploration schedule for dynamic terrain adaptation
+    entropy_coef_schedule: [(0, 0.01), (1500, 0.001)]
     truncate_grads: True
     e_clip: 0.2
     
-    horizon_length: 32 # Captures trip-recover lifecycle
-    minibatch_size: 8192
-    mini_epochs: 5
-    critic_coef: 1.0 # GAP 61 FIX: Balanced Critic
+    # 🚨 ADA SCALE: MoE Parity Locked
+    horizon_length: 64
+    minibatch_size: 65536 
+    # 🚨 PATCHED: Reduced from 8 to prevent trajectory overfitting
+    mini_epochs: 5        
+    
+    critic_coef: 1.0 
     clip_value: True

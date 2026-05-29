@@ -1,3 +1,4 @@
+# revex_ext/agents/custom_moe_ppo.py
 import torch
 import torch.nn as nn
 from skrl.agents.torch.ppo import PPO
@@ -5,13 +6,15 @@ from skrl.agents.torch.ppo import PPO
 class MoEPPOAgent(PPO):
     def __init__(self, models, memory, cfg, observation_space, action_space, device):
         super().__init__(models, memory, cfg, observation_space, action_space, device)
-        # SOTA Load Balancing Coef (Lambda)
+        
+        # 🚨 MOE AUXILIARY LOSS COEFFICIENTS
         self.load_balancing_coef = cfg.get("load_balancing_coef", 0.01)
+        self.virtual_opp_coef = cfg.get("virtual_opp_coef", 0.005)
 
     def _update(self, timestep, timesteps):
         """
-        16GB-Optimized PPO Update with Auxiliary MoE Loss.
-        Iterates over epochs and mini-batches to strictly control VRAM.
+        Production-Grade MoE PPO Update.
+        Handles base PPO Surrogate + Auxiliary Gating Network Losses.
         """
         # 1. Compute Generalized Advantage Estimation (GAE)
         self.memory.compute_returns_and_advantages(self.models["value"])
@@ -20,11 +23,10 @@ class MoEPPOAgent(PPO):
         cumulative_policy_loss = 0.0
         cumulative_value_loss = 0.0
         cumulative_entropy_loss = 0.0
-        cumulative_aux_loss = 0.0
+        cumulative_load_balance_loss = 0.0
+        cumulative_virtual_opp_loss = 0.0
 
-        # 2. The PPO Epoch Loop
         for epoch in range(self.learning_epochs):
-            # 3. The Mini-batch Loop (VRAM Saver)
             for sampled_batches in self.memory.sample_mini_batches(self.mini_batches):
                 
                 obs = sampled_batches["states"]
@@ -33,49 +35,58 @@ class MoEPPOAgent(PPO):
                 returns = sampled_batches["returns"]
                 old_log_probs = sampled_batches["log_prob"]
 
-                # 4. AMP Context for Forward Pass
                 with torch.cuda.amp.autocast(enabled=self.mixed_precision):
-                    # Evaluate policy and intercept extra MoE metrics
-                    action_mean, action_log_std, extra = self.models["policy"].compute(
+                    # 🚨 NATIVE SKRL SIGNATURE: Actions, Log_Prob, Outputs
+                    # The MoEPolicy handles all per-expert normalization internally!
+                    _, curr_log_probs, extra = self.models["policy"].compute(
                         {"states": obs}, role="policy"
                     )
                     
-                    # Reconstruct distribution and current log probs
-                    std = torch.exp(action_log_std)
-                    dist = torch.distributions.Normal(action_mean, std)
-                    curr_log_probs = dist.log_prob(actions).sum(dim=-1, keepdim=True)
+                    # Force evaluation of the actions taken in the rollout to get correct log_probs and entropy
+                    # (SKRL handles distribution tracking under the hood)
+                    _, curr_log_probs, _ = self.models["policy"].act({"states": obs}, role="policy")
+                    # Note: We recalculate log_prob for the *sampled* actions from the buffer
+                    # to properly compute the ratio. (Abstracted via standard PyTorch distribution tracking).
                     
-                    # Evaluate Critic
+                    # For safety in overriding, we fetch the distribution directly:
+                    dist = self.models["policy"].get_distribution()
+                    curr_log_probs = dist.log_prob(actions).sum(dim=-1, keepdim=True)
+                    entropy = dist.entropy().mean()
+
+                    # Evaluate Critic (The Omniscient Router Critic)
                     curr_values, _ = self.models["value"].compute({"states": obs}, role="value")
 
-                    # Standard PPO Surrogate Math
+                    # 2. Standard PPO Surrogate Math
                     ratio = torch.exp(curr_log_probs - old_log_probs)
                     surrogate_1 = ratio * advantages
                     surrogate_2 = torch.clamp(ratio, 1.0 - self.clip_predicted_values, 1.0 + self.clip_predicted_values) * advantages
                     policy_loss = -torch.min(surrogate_1, surrogate_2).mean()
-
                     value_loss = nn.functional.mse_loss(curr_values, returns)
-                    entropy_loss = -dist.entropy().mean()
+                    entropy_loss = -entropy
 
-                    # 🚨 INTERCEPT AUXILIARY LOSS
-                    aux_loss = torch.tensor(0.0, device=self.device)
+                    # 3. 🚨 INTERCEPT AUXILIARY LOSSES FROM THE MoE POLICY
+                    aux_lb_loss = torch.tensor(0.0, device=self.device)
                     if "load_balancing_loss" in extra:
-                        aux_loss = extra["load_balancing_loss"].mean()
+                        aux_lb_loss = extra["load_balancing_loss"].mean()
+                    
+                    aux_vo_loss = torch.tensor(0.0, device=self.device)
+                    if "virtual_opponent_loss" in extra:
+                        aux_vo_loss = extra["virtual_opponent_loss"].mean()
 
-                    # Total Loss Composite
+                    # 4. Total Loss Composite
                     total_loss = (
                         policy_loss 
                         + self.value_loss_scale * value_loss 
-                        - self.entropy_loss_scale * entropy_loss 
-                        + self.load_balancing_coef * aux_loss
+                        + self.entropy_loss_scale * entropy_loss 
+                        + self.load_balancing_coef * aux_lb_loss
+                        + self.virtual_opp_coef * aux_vo_loss
                     )
 
-                # 5. AMP-Safe Backward Pass & Optimization
+                # 5. AMP-Safe Backward Pass
                 self.optimizer.zero_grad()
                 
                 if self.mixed_precision:
                     self.scaler.scale(total_loss).backward()
-                    # Unscale before clipping gradients
                     self.scaler.unscale_(self.optimizer)
                     nn.utils.clip_grad_norm_(self.models["policy"].parameters(), self.grad_norm_clip)
                     nn.utils.clip_grad_norm_(self.models["value"].parameters(), self.grad_norm_clip)
@@ -87,17 +98,19 @@ class MoEPPOAgent(PPO):
                     nn.utils.clip_grad_norm_(self.models["value"].parameters(), self.grad_norm_clip)
                     self.optimizer.step()
 
-                # Track metrics for TensorBoard
+                # Track metrics
                 cumulative_policy_loss += policy_loss.item()
                 cumulative_value_loss += value_loss.item()
                 cumulative_entropy_loss += entropy_loss.item()
-                cumulative_aux_loss += aux_loss.item()
+                cumulative_load_balance_loss += aux_lb_loss.item()
+                cumulative_virtual_opp_loss += aux_vo_loss.item()
 
-        # Update Learning Rate Schedulers
         if self.learning_rate_scheduler is not None:
             self.learning_rate_scheduler.step()
 
         # Log metrics to SKRL tracker
-        self.track_data("Loss / Policy loss", cumulative_policy_loss / (self.learning_epochs * self.mini_batches))
-        self.track_data("Loss / Value loss", cumulative_value_loss / (self.learning_epochs * self.mini_batches))
-        self.track_data("Loss / Load Balancing loss", cumulative_aux_loss / (self.learning_epochs * self.mini_batches))
+        steps = self.learning_epochs * self.mini_batches
+        self.track_data("Loss / Policy loss", cumulative_policy_loss / steps)
+        self.track_data("Loss / Value loss", cumulative_value_loss / steps)
+        self.track_data("Loss / Load Balancing loss", cumulative_load_balance_loss / steps)
+        self.track_data("Loss / Virtual Opponent loss", cumulative_virtual_opp_loss / steps)
