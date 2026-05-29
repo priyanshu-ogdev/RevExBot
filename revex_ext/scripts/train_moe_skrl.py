@@ -83,7 +83,7 @@ def load_frozen_experts(policy_model, device, registry_path="data/expert_registr
             print(f"   ✅ Successfully injected Expert {i}")
         except Exception as e:
             print(f"⚠️ Warning during Expert {i} injection: {e}")
-            
+
 def main():
     set_seed(42)
     print(f"🚀 Igniting SKRL MoE Factory | Task: {args.task} | Phase: {args.phase.upper()}")
@@ -93,13 +93,16 @@ def main():
     env = SkrlVecEnvWrapper(env)
     
     # 4. Initialize Models (148-Float Tensors)
+    # Calculate Total Experts: 2 (Loco/Agile) + Dynamic Factory Experts
+    total_experts = 2 + len(registry.get("experts", []))
+    
     policy_model = RevExMoEPolicy(
         observation_space=env.observation_space,
         action_space=env.action_space,
         device=env.device,
-        num_experts=3,
+        num_experts=total_experts, # <--- DYNAMIC BRAIN SIZING
         top_k=2,
-        noise_scale=0.01 if args.phase == "router" else 0.0 # Explore only during routing
+        noise_scale=0.01 if args.phase == "router" else 0.0
     )
     
     # Asymmetric Critic sees the privileged physics state
