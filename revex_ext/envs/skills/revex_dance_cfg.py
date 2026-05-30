@@ -21,12 +21,13 @@ from .. import custom_mdp
 class RevExDanceObservationsCfg:
     @configclass
     class PolicyCfg(ObsGroup):
-        """ACTOR: Proprioception + Latent Style + Rhythm/Formation Sync"""
+        """ACTOR: Proprioception + Latent Style + Rhythm/Formation Sync (184-Float Vector)"""
         
-        # 🧠 Latent Conditioning (Matches Combat exactly for MoE parity)
+        # 🧠 Latent Conditioning (MoE parity)
         latent_style = ObsTerm(func=custom_mdp.get_latent_style_vector)
         latent_style_delta = ObsTerm(func=custom_mdp.get_latent_style_delta)
         
+        # Base Proprioception
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
@@ -34,22 +35,20 @@ class RevExDanceObservationsCfg:
         projected_gravity = ObsTerm(func=mdp.projected_gravity)
         last_action = ObsTerm(func=mdp.last_action) 
         
-        # 👥 Formation & Flow (Repurposes Combat's Multi-Threat buffer)
-        # K=5 vectors (15 floats) tracking relative positions of ghost troupe members
+        # 👥 Formation Tracking (K=5 vectors, 15 floats)
         multi_target_vectors = ObsTerm(func=custom_mdp.get_k_formation_vectors, params={"k": 5})
         
-        # =====================================================================
-        # 🚨 UNIVERSAL ROUTER SYNC (The 'scale=0.0' Protocol)
-        # Zero-pads combat-specific sensors to maintain the exact 184-float shape.
-        # =====================================================================
-        target_pos = ObsTerm(func=mdp.target_pos_rel, params={"asset_cfg": SceneEntityCfg("target_object")}, scale=0.0) 
-        target_orient = ObsTerm(func=mdp.target_quat_rel, params={"asset_cfg": SceneEntityCfg("target_object")}, scale=0.0) 
-        object_lin_vel = ObsTerm(func=mdp.object_lin_vel, params={"asset_cfg": SceneEntityCfg("target_object")}, default_val=0.0, scale=0.0)
-        wrist_force = ObsTerm(func=mdp.net_forces_and_torques, params={"sensor_cfg": SceneEntityCfg("wrist_contact_sensor")}, default_val=0.0, scale=0.0)
+        # 🚨 FIXED: Explicit O(1) Zero-Padding instead of invalid scale properties
+        target_pos = ObsTerm(func=custom_mdp.zero_pad_3d) 
+        target_orient = ObsTerm(func=custom_mdp.zero_pad_4d) 
+        object_lin_vel = ObsTerm(func=custom_mdp.zero_pad_3d)
+        wrist_force = ObsTerm(func=custom_mdp.zero_pad_6d)
         
-        # 🎵 Rhythm Proxy (Repurposes the 64-ray lidar array)
-        # Float 0 = beat phase. Floats 1-63 = 0.0 padding.
+        # 🎵 Rhythm Tracking Module (64 floats)
         wrist_rays = ObsTerm(func=custom_mdp.get_dance_rhythm_array)
+        
+        # 🚨 FIXED: Added the missing 36-float terrain scanner pad to hit exactly 184 floats
+        height_scan_pad = ObsTerm(func=custom_mdp.zero_pad_height_scan)
         
         def __post_init__(self):
             self.enable_corruption = True 
@@ -78,9 +77,12 @@ class RevExDanceObservationsCfg:
             self.concatenate_terms = True
             self.history_length = 0
 
+    policy: PolicyCfg = PolicyCfg()
+    critic: CriticCfg = CriticCfg()
+    
 @configclass
 class RevExDanceActionsCfg:
-    joint_efforts = mdp.JointEffortActionCfg(
+    joint_positions = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=[".*"],
         scale=1.0,

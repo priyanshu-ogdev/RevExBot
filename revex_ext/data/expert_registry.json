@@ -1,7 +1,7 @@
 {
-  "base_locomotion": {
-    "path": "runs/phase2/nn/phase2_agile.pth", 
-    "domain": "core"
-  },
-  "experts": [] 
+    "loco": "",
+    "agile": "",
+    "combat": "",
+    "dance": "",
+    "precision": ""
 }

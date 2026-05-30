@@ -21,11 +21,10 @@ class RevExPrecisionObservationsCfg:
     @configclass
     class PolicyCfg(ObsGroup):
         """ACTOR: Proprioception + Latent Style + 6D Tracking + Force Modulation"""
-        # 🧠 Latent Conditioning (MoE parity with Combat/Dance)
         latent_style = ObsTerm(func=custom_mdp.get_latent_style_vector)
         latent_style_delta = ObsTerm(func=custom_mdp.get_latent_style_delta)
         
-        # Base Proprioception & Latency Bridge
+        # Base Proprioception
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
@@ -33,24 +32,28 @@ class RevExPrecisionObservationsCfg:
         projected_gravity = ObsTerm(func=mdp.projected_gravity)
         last_action = ObsTerm(func=mdp.last_action)
         
-        # 🎯 6D Target Tracking
+        # 🚨 PARITY SINK 1: The 15-float Virtual Arena threat array
+        multi_target_vectors = ObsTerm(func=custom_mdp.get_k_nearest_threat_vectors, params={"k": 5})
+        
+        # 🎯 ACTIVE SENSORS: 6D Target Tracking
         target_pos = ObsTerm(func=mdp.target_pos_rel, params={"asset_cfg": SceneEntityCfg("target_object")}) 
         target_orient = ObsTerm(func=mdp.target_quat_rel, params={"asset_cfg": SceneEntityCfg("target_object")}) 
-        
-        # ⚙️ Object & Force State (With Sim-to-Real Noise Injection)
         object_lin_vel = ObsTerm(func=mdp.object_lin_vel, params={"asset_cfg": SceneEntityCfg("target_object")}, default_val=0.0)
         
-        # 🚨 CRITICAL: Force sensor noise for hardware robustness
+        # 🚨 ACTIVE SENSORS: Force modulation with hardware jitter simulation
         wrist_force = ObsTerm(
             func=mdp.net_forces_and_torques, 
             params={"sensor_cfg": SceneEntityCfg("wrist_contact_sensor")},
             default_val=0.0,
-            noise=mdp.add_uniform_noise, # Simulates F/T sensor jitter
+            noise=mdp.add_uniform_noise, 
             noise_params={"range": [-0.5, 0.5]} 
         )
         
-        # 📡 Obstacle/Pressure Awareness
+        # 📡 ACTIVE SENSORS: 360° Obstacle/Pressure Awareness
         wrist_rays = ObsTerm(func=mdp.ray_cast_sensor_distances, params={"sensor_cfg": SceneEntityCfg("spatial_awareness_raycaster")}, default_val=3.0)
+        
+        # 🚨 PARITY SINK 2: The missing 36-float downward terrain pad
+        height_scan_pad = ObsTerm(func=custom_mdp.zero_pad_height_scan)
         
         def __post_init__(self):
             self.enable_corruption = True 
@@ -59,29 +62,25 @@ class RevExPrecisionObservationsCfg:
 
     @configclass
     class CriticCfg(ObsGroup):
-        """CRITIC: Omniscient State + Zero-Padded AMP (Parity Only)"""
+        """CRITIC: PPO-Native (AMP Padding Removed to prevent shape-inference crashes)"""
         policy_obs = ObsTerm(func=mdp.obs_group, params={"group_name": "policy"})
         root_pos_w = ObsTerm(func=mdp.root_pos_w)
         root_lin_vel_w = ObsTerm(func=mdp.root_lin_vel_w)
         root_ang_vel_w = ObsTerm(func=mdp.root_ang_vel_w)
-        
         friction = ObsTerm(func=mdp.friction_coef)
         body_mass = ObsTerm(func=mdp.body_mass)
-        
-        # 🚨 PARITY FIX: Zero-padded terms match exact AMP reference shapes
-        ref_joint_pos = ObsTerm(func=mdp.zero_term) 
-        ref_root_pos = ObsTerm(func=mdp.zero_term)   
-        ref_root_vel = ObsTerm(func=mdp.zero_term)
-        ref_joint_vel = ObsTerm(func=mdp.zero_term)
 
         def __post_init__(self):
             self.enable_corruption = False
             self.concatenate_terms = True
             self.history_length = 0
 
+    policy: PolicyCfg = PolicyCfg()
+    critic: CriticCfg = CriticCfg()
+    
 @configclass
 class RevExPrecisionActionsCfg:
-    joint_efforts = mdp.JointEffortActionCfg(
+    joint_positions = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=[".*"],
         scale=1.0,

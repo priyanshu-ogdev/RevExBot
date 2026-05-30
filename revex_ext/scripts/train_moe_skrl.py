@@ -10,7 +10,6 @@ parser = argparse.ArgumentParser(description="SKRL MoE Trainer (5-Expert RevExBo
 parser.add_argument("--task", type=str, default="RevEx-Combat-v0", help="MoE Task to assemble.")
 parser.add_argument("--phase", type=str, default="router", choices=["router", "finetune"], help="Curriculum phase.")
 parser.add_argument("--checkpoint", type=str, default=None, help="Resume an MoE checkpoint.")
-parser.add_argument("--expert_names", type=str, nargs="+", default=["loco", "agile", "combat", "dance", "precision"], help="Expert names for routing.")
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 
@@ -30,23 +29,20 @@ from skrl.utils import set_seed
 from revex_ext.models.moe_policy import RevExMoEPolicy, RevExCritic
 from revex_ext.agents.custom_moe_ppo import MoEPPOAgent
 
-def load_expert_registry(registry_path="data/expert_registry.json"):
+def load_expert_registry(registry_path="revex_ext/data/expert_registry.json"):
     """Loads the expert registry and returns a dict of {name: path}."""
     expert_paths = {}
     
-    # Base survival experts (always required)
-    expert_paths["loco"] = "data/weights/expert_loco_v1.pth"
-    expert_paths["agile"] = "data/weights/expert_agile_v1.pth"
-    
-    # Dynamic domain experts from registry
     if os.path.exists(registry_path):
         with open(registry_path, 'r') as f:
             registry = json.load(f)
-        for entry in registry.get("experts", []):
-            name = entry.get("style", entry.get("domain", "unknown"))
-            path = entry.get("policy_path")
+        for name, path in registry.items():
             if path and os.path.exists(path):
                 expert_paths[name] = path
+            else:
+                print(f"⚠️ Warning: Configured expert '{name}' missing valid path in registry.")
+    else:
+        print(f"🚨 FATAL: Registry not found at {registry_path}")
                 
     return expert_paths
 
@@ -70,7 +66,10 @@ def load_frozen_experts(policy_model, expert_paths, device):
             rm = checkpoint["running_mean_std"]["running_mean"].to(device)
             rv = checkpoint["running_mean_std"]["running_var"].to(device)
             std = torch.sqrt(rv) + 1e-8
-            # Register as buffer in policy (handled by _build_experts if path is non-empty)
+            
+            # Inject directly into the policy buffers
+            setattr(policy_model, f"{name}_obs_mean", rm)
+            setattr(policy_model, f"{name}_obs_std", std)
             
         raw_state_dict = checkpoint.get("model", checkpoint)
         expert_state_dict = {}
@@ -82,6 +81,7 @@ def load_frozen_experts(policy_model, expert_paths, device):
             if "value" in clean_key or "critic" in clean_key or "discriminator" in clean_key:
                 continue
                 
+            # 🚨 CRITICAL FIX: Strip "mlp." to map perfectly to nn.Sequential
             if "mlp." in clean_key:
                 clean_key = clean_key.replace("mlp.", "")
                 
@@ -89,12 +89,12 @@ def load_frozen_experts(policy_model, expert_paths, device):
 
         try:
             if name in policy_model.experts:
-                policy_model.experts[name].load_state_dict(expert_state_dict, strict=False)
+                policy_model.experts[name].load_state_dict(expert_state_dict, strict=True)
                 print(f"   ✅ Successfully injected Expert '{name}'")
             else:
                 print(f"   ⚠️ Expert '{name}' not found in policy model")
         except Exception as e:
-            print(f"⚠️ Warning during Expert '{name}' injection: {e}")
+            print(f"   ❌ FATAL Error during Expert '{name}' injection: {e}")
 
 def main():
     set_seed(42)
@@ -108,28 +108,32 @@ def main():
     expert_paths = load_expert_registry()
     print(f"📋 Loaded {len(expert_paths)} experts: {list(expert_paths.keys())}")
     
+    # 🚨 FIXED: Pass dummy paths to bypass internal flawed loader
+    dummy_paths = {k: "" for k in expert_paths.keys()}
     policy_model = RevExMoEPolicy(
         observation_space=env.observation_space,
         action_space=env.action_space,
         device=env.device,
-        expert_paths=expert_paths,  # Pass paths for _build_experts to handle loading
+        expert_paths=dummy_paths,  
         router_hidden_dims=[128, 64],
         top_k=2,
         noise_scale=0.01 if args.phase == "router" else 0.0,
         load_balancing_coef=0.01
     )
     
-    # Asymmetric Critic sees the privileged physics state
+    # 🚨 FIXED: Explicitly call our surgical injector to correctly map "mlp." keys
+    load_frozen_experts(policy_model, expert_paths, env.device)
+    
+    # 🚨 FIXED: Standard SKRL Signature for the Critic
     critic_model = RevExCritic(
-        privileged_observation_space=env.observation_space,
+        observation_space=env.observation_space,
+        action_space=env.action_space,
         device=env.device
     )
 
     # 5. Curriculum Phase Lock (The Freezing Protocol)
     if args.phase == "router":
-        # Experts are already loaded and frozen by RevExMoEPolicy._build_experts
         print("🧊 FREEZING EXPERTS: Isolating Gradients to Master Router Gate...")
-        # (Freezing is handled in _build_experts, but we can double-check)
         for expert in policy_model.experts.values():
             for param in expert.parameters():
                 param.requires_grad = False
@@ -138,35 +142,28 @@ def main():
         for expert in policy_model.experts.values():
             for param in expert.parameters():
                 param.requires_grad = True
-        # Also unfreeze gating network if needed
         for param in policy_model.gating_network.parameters():
             param.requires_grad = True
 
     # 6. SKRL Hyperparameter Configuration (Ada 6000 Optimized)
     cfg = PPO_DEFAULT_CONFIG.copy()
     
-    # 🚨 ADA SCALE: Match 16k environment training
-    cfg["rollouts"] = 64          # Longer horizon for stable routing
+    cfg["rollouts"] = 64          
     cfg["learning_epochs"] = 6
-    cfg["mini_batches"] = 16      # More batches for 48GB VRAM
-    cfg["mixed_precision"] = True # FP16 Tensor Core Activation
+    cfg["mini_batches"] = 16      
+    cfg["mixed_precision"] = True 
     
-    # PPO Mathematics
     cfg["discount_factor"] = 0.99
     cfg["lambda"] = 0.95
     cfg["grad_norm_clip"] = 1.0
     
-    # 🚨 MOE AUXILIARY LOSSES
     cfg["load_balancing_coef"] = 0.01
     cfg["virtual_opp_coef"] = 0.005
     
-    # 🚨 CRITICAL: Disable SKRL's global normalization
-    # MoEPolicy handles per-expert normalization internally
     cfg["normalize_input"] = False
     cfg["normalize_value"] = True
     cfg["value_bootstrap"] = True
     
-    # Optimizer Injection (SGD for Router stability, Adam for Finetune)
     if args.phase == "router":
         cfg["optimizer"] = torch.optim.SGD
         cfg["optimizer_kwargs"] = {"lr": 1e-3, "momentum": 0.9}
@@ -197,9 +194,12 @@ def main():
         print(f"📥 Loading MoE Checkpoint: {args.checkpoint}")
         agent.load(args.checkpoint)
 
-    # 8. Execution
-    trainer = SequentialTrainer(cfg={"timesteps": 150000, "environment": env})
-    trainer.register_agent(agent)
+    # 8. 🚨 FIXED: Legal SKRL Trainer Assembly
+    trainer = SequentialTrainer(
+        env=env,
+        agents=agent,
+        cfg={"timesteps": 150000}
+    )
     trainer.run()
 
     env.close()

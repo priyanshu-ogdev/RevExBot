@@ -21,11 +21,12 @@ from .. import custom_mdp
 class RevExCombatObservationsCfg:
     @configclass
     class PolicyCfg(ObsGroup):
-        """ACTOR: Proprioception + Latent Conditioning + Tactical Awareness"""
-        # 🧠 Latent Style Conditioning (32D embedding + delta for smooth interpolation)
+        """ACTOR: Proprioception + Latent Conditioning + Tactical Awareness (184-Float Vector)"""
+        # 🧠 Latent Style Conditioning
         latent_style = ObsTerm(func=custom_mdp.get_latent_style_vector)
         latent_style_delta = ObsTerm(func=custom_mdp.get_latent_style_delta)
         
+        # Base Proprioception
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
@@ -33,19 +34,20 @@ class RevExCombatObservationsCfg:
         projected_gravity = ObsTerm(func=mdp.projected_gravity)
         last_action = ObsTerm(func=mdp.last_action) 
         
-        # 🎯 Multi-Threat Spatial Buffer (K=5 nearest enemies, 15 floats)
+        # 🎯 Tactical Spatial Buffers (K=5 nearest threats, 15 floats)
         multi_target_vectors = ObsTerm(func=custom_mdp.get_k_nearest_threat_vectors, params={"k": 5})
         
-        # 🎯 Single Target Fallback / AMP Anchor
+        # 🎯 Active Target & Physics Tracking
         target_pos = ObsTerm(func=mdp.target_pos_rel, params={"asset_cfg": SceneEntityCfg("target_object")}) 
         target_orient = ObsTerm(func=mdp.target_quat_rel, params={"asset_cfg": SceneEntityCfg("target_object")}) 
-        
-        # ⚔️ Weapon & Physics State
         object_lin_vel = ObsTerm(func=mdp.object_lin_vel, params={"asset_cfg": SceneEntityCfg("target_object")}, default_val=0.0) 
         wrist_force = ObsTerm(func=mdp.net_forces_and_torques, params={"sensor_cfg": SceneEntityCfg("wrist_contact_sensor")}, default_val=0.0) 
         
-        # 📡 360° Spatial Awareness (64-ray cylindrical lidar proxy)
+        # 📡 Active 360° Spatial Lidar Array (64 floats)
         wrist_rays = ObsTerm(func=mdp.ray_cast_sensor_distances, params={"sensor_cfg": SceneEntityCfg("spatial_awareness_raycaster")}, default_val=3.0)
+        
+        # 🚨 FIXED: Added missing 36-float height scan pad to hit exactly 184 floats for MoE routing
+        height_scan_pad = ObsTerm(func=custom_mdp.zero_pad_height_scan)
         
         def __post_init__(self):
             self.enable_corruption = True 
@@ -74,9 +76,12 @@ class RevExCombatObservationsCfg:
             self.concatenate_terms = True
             self.history_length = 0
 
+    policy: PolicyCfg = PolicyCfg()
+    critic: CriticCfg = CriticCfg()
+    
 @configclass
 class RevExCombatActionsCfg:
-    joint_efforts = mdp.JointEffortActionCfg(
+    joint_positions = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=[".*"],
         scale=1.0,

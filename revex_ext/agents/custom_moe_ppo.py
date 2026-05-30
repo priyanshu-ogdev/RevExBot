@@ -35,25 +35,16 @@ class MoEPPOAgent(PPO):
                 returns = sampled_batches["returns"]
                 old_log_probs = sampled_batches["log_prob"]
 
-                with torch.cuda.amp.autocast(enabled=self.mixed_precision):
-                    # 🚨 NATIVE SKRL SIGNATURE: Actions, Log_Prob, Outputs
-                    # The MoEPolicy handles all per-expert normalization internally!
-                    _, curr_log_probs, extra = self.models["policy"].compute(
-                        {"states": obs}, role="policy"
-                    )
+                                with torch.cuda.amp.autocast(enabled=self.mixed_precision):
+                    # 🚨 FIXED: Use act() as the single entry point to preserve SKRL state & graph
+                    _, _, extra = self.models["policy"].act({"states": obs}, role="policy")
                     
-                    # Force evaluation of the actions taken in the rollout to get correct log_probs and entropy
-                    # (SKRL handles distribution tracking under the hood)
-                    _, curr_log_probs, _ = self.models["policy"].act({"states": obs}, role="policy")
-                    # Note: We recalculate log_prob for the *sampled* actions from the buffer
-                    # to properly compute the ratio. (Abstracted via standard PyTorch distribution tracking).
-                    
-                    # For safety in overriding, we fetch the distribution directly:
+                    # Extract log_probs & entropy from the cached distribution
                     dist = self.models["policy"].get_distribution()
                     curr_log_probs = dist.log_prob(actions).sum(dim=-1, keepdim=True)
                     entropy = dist.entropy().mean()
 
-                    # Evaluate Critic (The Omniscient Router Critic)
+                    # Evaluate Critic
                     curr_values, _ = self.models["value"].compute({"states": obs}, role="value")
 
                     # 2. Standard PPO Surrogate Math
@@ -72,7 +63,7 @@ class MoEPPOAgent(PPO):
                     aux_vo_loss = torch.tensor(0.0, device=self.device)
                     if "virtual_opponent_loss" in extra:
                         aux_vo_loss = extra["virtual_opponent_loss"].mean()
-
+                        
                     # 4. Total Loss Composite
                     total_loss = (
                         policy_loss 

@@ -52,7 +52,8 @@ class RevExCommandsCfg:
 
 @configclass
 class RevExActionsCfg:
-    joint_efforts = mdp.JointEffortActionCfg(
+    # 🚨 FIXED: Transitioned to Hardware-Safe Position Control
+    joint_positions = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=[".*"], 
         scale=1.0, 
@@ -114,20 +115,20 @@ class RevExObservationsCfg:
         height_scan = ObservationTermCfg(func=mdp.ray_cast_sensor_distances, params={"sensor_cfg": SceneEntityCfg("height_scanner")})
         
         # =====================================================================
-        # 3. 🚨 UNIVERSAL MOE PARITY SINK (scale=0.0)
-        # Zeros out Combat/Dance arrays to guarantee perfect 184-float matrix shape parity
+        # 3. 🚨 UNIVERSAL MOE PARITY SINK (Compute-Optimized Zero Padding)
+        # Bypasses expensive sensor evaluations to preserve VRAM & maintain 184-shape
         # =====================================================================
-        latent_style = ObservationTermCfg(func=custom_mdp.get_latent_style_vector, scale=0.0)
-        latent_style_delta = ObservationTermCfg(func=custom_mdp.get_latent_style_delta, scale=0.0)
-        multi_target_vectors = ObservationTermCfg(func=custom_mdp.get_k_nearest_threat_vectors, params={"k": 5}, scale=0.0)
+        latent_style = ObservationTermCfg(func=custom_mdp.get_latent_style_vector)
+        latent_style_delta = ObservationTermCfg(func=custom_mdp.get_latent_style_delta)
+        multi_target_vectors = ObservationTermCfg(func=custom_mdp.get_k_nearest_threat_vectors, params={"k": 5})
         
-        target_pos = ObservationTermCfg(func=mdp.target_pos_rel, params={"asset_cfg": SceneEntityCfg("target_object")}, scale=0.0) 
-        target_orient = ObservationTermCfg(func=mdp.target_quat_rel, params={"asset_cfg": SceneEntityCfg("target_object")}, scale=0.0) 
-        object_lin_vel = ObservationTermCfg(func=mdp.object_lin_vel, params={"asset_cfg": SceneEntityCfg("target_object")}, default_val=0.0, scale=0.0)
-        wrist_force = ObservationTermCfg(func=mdp.net_forces_and_torques, params={"sensor_cfg": SceneEntityCfg("wrist_contact_sensor")}, default_val=0.0, scale=0.0)
+        target_pos = ObservationTermCfg(func=custom_mdp.zero_pad_3d) 
+        target_orient = ObservationTermCfg(func=custom_mdp.zero_pad_4d) 
+        object_lin_vel = ObservationTermCfg(func=custom_mdp.zero_pad_3d)
+        wrist_force = ObservationTermCfg(func=custom_mdp.zero_pad_6d)
         
         # Combat's 360-lidar padded to zero
-        combat_lidar_pad = ObservationTermCfg(func=mdp.ray_cast_sensor_distances, params={"sensor_cfg": SceneEntityCfg("spatial_awareness_raycaster")}, default_val=3.0, scale=0.0)
+        combat_lidar_pad = ObservationTermCfg(func=custom_mdp.zero_pad_64d)
 
         def __post_init__(self):
             self.enable_corruption = True
@@ -171,7 +172,7 @@ class RevExTerminationsCfg:
 
 @configclass
 class RevExAgileCfg(ManagerBasedRLEnvCfg):
-    # 🚨 FIXED: Inherits Universal MoE Scene instead of standalone duplicate
+    # 🚨 FIXED: Inherits Universal MoE Scene
     scene: RevExAgileSceneCfg = RevExAgileSceneCfg(num_envs=16384, env_spacing=2.0)
     
     actions: RevExActionsCfg = RevExActionsCfg()

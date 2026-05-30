@@ -2,7 +2,6 @@
 import math
 from dataclasses import MISSING
 
-# Isaac Lab core imports
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
 from omni.isaac.lab.sim import SimulationCfg, PhysxCfg
 from omni.isaac.lab.managers import (
@@ -12,13 +11,11 @@ from omni.isaac.lab.managers import (
 from omni.isaac.lab.utils import configclass
 import omni.isaac.lab.envs.mdp as mdp
 
-# MoE Parity & Custom MDP Imports
 from envs.skills.revex_scene_cfg import RevExCombatSceneCfg
 from .. import custom_mdp
 
 @configclass
 class RevExLocoSceneCfg(RevExCombatSceneCfg):
-    """Inherits all MoE sensors/targets to prevent KeyError, keeps terrain flat."""
     pass
 
 @configclass
@@ -36,11 +33,12 @@ class RevExCommandsCfg:
 
 @configclass
 class RevExActionsCfg:
-    joint_efforts = mdp.JointEffortActionCfg(
+    # 🚨 FIXED: Transitioned to Position Control to prevent Sim-to-Real hardware destruction
+    joint_positions = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=[".*"], 
         scale=1.0,         
-        use_default_offset=True 
+        use_default_offset=True  # Safely supported by JointPositionActionCfg
     )
 
 @configclass
@@ -59,26 +57,21 @@ class RevExCurriculumCfg:
 
 @configclass
 class RevExRewardsCfg:
-    # 1. Base Tracking
     tracking_lin_vel = RewardTermCfg(func=mdp.track_lin_vel_xy_exp, weight=1.5, params={"std": 0.25})
     tracking_ang_vel = RewardTermCfg(func=mdp.track_ang_vel_z_exp, weight=0.75, params={"std": 0.25})
     alive_bonus = RewardTermCfg(func=mdp.is_alive, weight=0.1)
     
-    # 2. Asymmetric Effort (Lazy Upper Body, Stiff Lower Body)
     action_rate_legs = RewardTermCfg(func=mdp.action_rate_l2, weight=-0.02, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_.*", ".*_knee_.*", ".*_ankle_.*"])})
     action_rate_torso = RewardTermCfg(func=mdp.action_rate_l2, weight=-0.1, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_.*", ".*_elbow_.*", "waist_yaw_joint"])})
     action_rate_hands = RewardTermCfg(func=mdp.action_rate_l2, weight=-0.2, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wrist_.*", ".*_thumb_.*", ".*_index_.*", ".*_middle_.*", ".*_ring_.*", ".*_pinky_.*"])})
     
-    # 3. Full-Body Instincts
     base_ang_vel_penalty = RewardTermCfg(func=mdp.base_ang_vel_l2, weight=-0.5, params={"asset_cfg": SceneEntityCfg("robot")})
     hand_posture_lock = RewardTermCfg(func=mdp.joint_pos_target_l2, weight=-0.8, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_thumb_.*", ".*_index_.*", ".*_middle_.*", ".*_ring_.*", ".*_pinky_.*"]), "target": 0.35})
     
-    # 4. Hardware Protection & Efficiency
     energy_cost = RewardTermCfg(func=custom_mdp.power_consumption, weight=-0.0005, params={"asset_cfg": SceneEntityCfg("robot")})
     joint_limits = RewardTermCfg(func=mdp.joint_pos_limits, weight=-0.2, params={"asset_cfg": SceneEntityCfg("robot")})
     foot_slip = RewardTermCfg(func=mdp.foot_slip, weight=-0.3, params={"asset_cfg": SceneEntityCfg("robot", body_names=[".*ankle_roll_link"]), "sensor_cfg": SceneEntityCfg("contact_forces"), "threshold": 0.1})
     
-    # 5. Gait Shaping
     knee_compliance = RewardTermCfg(func=mdp.joint_pos_target_l2, weight=0.3, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_knee_joint"]), "target": 0.15})
     arm_swing = RewardTermCfg(func=custom_mdp.arm_swing_symmetry, weight=0.2, params={
         "left_arm_cfg": SceneEntityCfg("robot", joint_names=["left_shoulder_pitch_joint"]),
@@ -91,7 +84,6 @@ class RevExRewardsCfg:
 class RevExObservationsCfg:
     @configclass
     class PolicyCfg(ObservationGroupCfg):
-        # Base Loco Proprioception
         projected_gravity = ObservationTermCfg(func=mdp.projected_gravity, noise=mdp.add_uniform_noise, noise_params={"range": [-0.02, 0.02]})
         joint_pos = ObservationTermCfg(func=mdp.joint_pos_rel, noise=mdp.add_uniform_noise, noise_params={"range": [-0.02, 0.02]})
         joint_vel = ObservationTermCfg(func=mdp.joint_vel_rel, noise=mdp.add_uniform_noise, noise_params={"range": [-0.1, 0.1]})
@@ -102,21 +94,21 @@ class RevExObservationsCfg:
         velocity_commands = ObservationTermCfg(func=mdp.generated_commands, params={"command_name": "base_velocity"})
         
         # =====================================================================
-        # 🚨 UNIVERSAL MOE PARITY SINK (scale=0.0)
-        # Zeros out Combat/Dance arrays to guarantee perfect 184-float matrix shape parity
+        # 🚨 UNIVERSAL MOE PARITY SINK (Compute-Optimized Zero Padding)
+        # Bypasses expensive sensor evaluations to preserve VRAM & maintain 184-shape
         # =====================================================================
-        latent_style = ObservationTermCfg(func=custom_mdp.get_latent_style_vector, scale=0.0)
-        latent_style_delta = ObservationTermCfg(func=custom_mdp.get_latent_style_delta, scale=0.0)
-        multi_target_vectors = ObservationTermCfg(func=custom_mdp.get_k_nearest_threat_vectors, params={"k": 5}, scale=0.0)
+        latent_style = ObservationTermCfg(func=custom_mdp.get_latent_style_vector)
+        latent_style_delta = ObservationTermCfg(func=custom_mdp.get_latent_style_delta)
+        multi_target_vectors = ObservationTermCfg(func=custom_mdp.get_k_nearest_threat_vectors, params={"k": 5})
         
-        target_pos = ObservationTermCfg(func=mdp.target_pos_rel, params={"asset_cfg": SceneEntityCfg("target_object")}, scale=0.0) 
-        target_orient = ObservationTermCfg(func=mdp.target_quat_rel, params={"asset_cfg": SceneEntityCfg("target_object")}, scale=0.0) 
-        object_lin_vel = ObservationTermCfg(func=mdp.object_lin_vel, params={"asset_cfg": SceneEntityCfg("target_object")}, default_val=0.0, scale=0.0)
-        wrist_force = ObservationTermCfg(func=mdp.net_forces_and_torques, params={"sensor_cfg": SceneEntityCfg("wrist_contact_sensor")}, default_val=0.0, scale=0.0)
+        # FIXED: Removed `scale=0.0`. Using dummy zero-pad functions.
+        target_pos = ObservationTermCfg(func=custom_mdp.zero_pad_3d) 
+        target_orient = ObservationTermCfg(func=custom_mdp.zero_pad_4d) 
+        object_lin_vel = ObservationTermCfg(func=custom_mdp.zero_pad_3d)
+        wrist_force = ObservationTermCfg(func=custom_mdp.zero_pad_6d)
         
-        # Combat's 360-lidar and height scanners padded to zero
-        combat_lidar_pad = ObservationTermCfg(func=mdp.ray_cast_sensor_distances, params={"sensor_cfg": SceneEntityCfg("spatial_awareness_raycaster")}, default_val=3.0, scale=0.0)
-        height_scan_pad = ObservationTermCfg(func=mdp.ray_cast_sensor_distances, params={"sensor_cfg": SceneEntityCfg("height_scanner")}, default_val=1.5, scale=0.0)
+        combat_lidar_pad = ObservationTermCfg(func=custom_mdp.zero_pad_64d)
+        height_scan_pad = ObservationTermCfg(func=custom_mdp.zero_pad_height_scan)
 
         def __post_init__(self):
             self.enable_corruption = True
@@ -151,7 +143,6 @@ class RevExTerminationsCfg:
 
 @configclass
 class RevExLocoCfg(ManagerBasedRLEnvCfg):
-    # 🚨 FIXED: Inherits Universal MoE Scene instead of standalone duplicate
     scene: RevExLocoSceneCfg = RevExLocoSceneCfg(num_envs=16384, env_spacing=2.0)
     
     actions: RevExActionsCfg = RevExActionsCfg()

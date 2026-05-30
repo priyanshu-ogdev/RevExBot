@@ -22,19 +22,9 @@ from rl_games.torch_runner import Runner
 
 import revex_ext 
 
-# 🚨 PRODUCTION HOOK: This class intercepts the rl_games runner to export flat stats
-class RevexCheckpointExporter(Runner):
-    def save(self, fn):
-        super().save(fn)
-        # Extract and save flat normalization stats for the MoE Policy
-        checkpoint = torch.load(fn)
-        if "running_mean_std" in checkpoint:
-            print(f"✅ Normalization stats exported to {fn}")
-        # (rl_games auto-saves stats in the checkpoint dictionary)
-
 @hydra_task_config(args.task, "rl_games_cfg")
 def main(env_cfg, agent_cfg: dict):
-    # Apply 16k environment override
+    # Apply 16k environment override for hardware saturation parity
     env_cfg.scene.num_envs = 16384 
 
     env = ManagerBasedRLEnv(cfg=env_cfg)
@@ -45,14 +35,16 @@ def main(env_cfg, agent_cfg: dict):
         "env_creator": lambda **kwargs: env
     })
 
-    # 🚨 Use our custom exporter runner
-    runner = RevexCheckpointExporter()
+    # 🚨 FIXED: Reverted to native Runner. rl_games handles stats internally,
+    # and MoEPolicy natively unpacks them. No fragile interceptors needed.
+    runner = Runner()
     runner.load(agent_cfg)
     
     run_kwargs = {"train": True, "play": False}
     if args.checkpoint:
         run_kwargs["checkpoint"] = args.checkpoint
 
+    print(f"🔥 Igniting RL-Games Forge for {args.task}...")
     runner.run(run_kwargs)
 
     env.close()

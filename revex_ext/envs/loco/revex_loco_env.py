@@ -1,4 +1,4 @@
-from omni.isaac.lab.envs import ManagerBasedRLEnv # 🚨 UPGRADED
+from omni.isaac.lab.envs import ManagerBasedRLEnv
 from .revex_loco_cfg import RevExLocoCfg
 
 class RevExLocoEnv(ManagerBasedRLEnv):
