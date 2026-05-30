@@ -37,7 +37,14 @@ def main(env_cfg, agent_cfg: dict):
     env = RlGamesVecEnvWrapper(env, device=env_cfg.sim.device)
 
     # Configure Runner
+    # Configure Runner
     agent_cfg["params"]["config"]["num_actors"] = env.num_envs
+    
+    # Force evaluation overrides to prevent minibatch size crashes
+    agent_cfg["params"]["config"]["minibatch_size"] = env.num_envs * agent_cfg["params"]["config"]["horizon_length"]
+    agent_cfg["params"]["config"]["mini_epochs"] = 1
+    
+    runner = Runner()
     runner = Runner()
     runner.load(agent_cfg)
     
