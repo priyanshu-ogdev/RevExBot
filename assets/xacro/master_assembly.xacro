@@ -558,18 +558,20 @@
 
   <xacro:hri_hand 
       prefix="rh_" 
+      reflect="1"
       parent="right_wrist_yaw_link" 
       mesh_dir="../meshes">
       
-      <origin xyz="0 0 0" rpy="0.7854 3.14159 -1.5708" />
+      <origin xyz="0 0 0" rpy="-0.7854 3.14159 -1.5708" />
   </xacro:hri_hand>
 
   <xacro:hri_hand 
       prefix="lh_" 
+      reflect="-1"
       parent="left_wrist_yaw_link" 
       mesh_dir="../meshes">
       
-      <origin xyz="0 0 0" rpy="-0.7854 3.14159 -1.5708" />
+      <origin xyz="0 0 0" rpy="0.7854 3.14159 1.5708" />
   </xacro:hri_hand>
 
 </robot>
