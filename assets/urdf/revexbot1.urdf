@@ -13,7 +13,6 @@
   <material name="LightGrey">
     <color rgba="0.8 0.8 0.8 1.0"/>
   </material>
-  <!-- ========== PELVIS ========== -->
   <link name="pelvis_link">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.0540918323179141 -3.48259522403486E-05 -0.0156255182184312"/>
@@ -34,7 +33,6 @@
       </geometry>
     </collision>
   </link>
-  <!-- ========== LEFT LEG ========== -->
   <link name="left_hip_pitch_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00172895433511948 0.0360563262466087 0.000569266739481308"/>
@@ -60,7 +58,6 @@
     <child link="left_hip_pitch_link"/>
     <axis xyz="0 1 0"/>
     <limit effort="120" lower="-2.094" upper="1.0" velocity="8"/>
-    <!-- GAP 1 FIX: Added armature for gearbox inertia -->
     <dynamics armature="0.02" damping="0.095625" friction="0.15"/>
   </joint>
   <link name="left_hip_roll_link">
@@ -193,7 +190,6 @@
       </geometry>
       <material name="DarkGrey"/>
     </visual>
-    <!-- GAP 3 FIX: Padded collision box to prevent floor clipping -->
     <collision name="left_toe_collision">
       <origin rpy="0 0 0" xyz="0.025 0 0.006"/>
       <geometry>
@@ -209,7 +205,6 @@
     <limit effort="30" lower="-1.047" upper="0" velocity="8"/>
     <dynamics armature="0.001" damping="0.001" friction="0.02"/>
   </joint>
-  <!-- ========== RIGHT LEG ========== -->
   <link name="right_hip_pitch_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00172891543963928 -0.0360560777469901 0.000568830845064178"/>
@@ -367,7 +362,6 @@
       </geometry>
       <material name="DarkGrey"/>
     </visual>
-    <!-- GAP 3 FIX: Padded collision box to prevent floor clipping -->
     <collision name="right_toe_collision">
       <origin rpy="0 0 0" xyz="0.025 0 0.006"/>
       <geometry>
@@ -383,7 +377,6 @@
     <limit effort="30" lower="0" upper="1.047" velocity="8"/>
     <dynamics armature="0.001" damping="0.001" friction="0.02"/>
   </joint>
-  <!-- ========== UPPER BODY ========== -->
   <link name="waist_yaw_link">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00699393636668848 -2.50812125574469E-05 0.20403987801712"/>
@@ -411,12 +404,11 @@
     <limit effort="150" lower="-1.570796" upper="1.570796" velocity="5"/>
     <dynamics armature="0.02" damping="0.095625" friction="0.15"/>
   </joint>
-  <!-- ========== NECK & HEAD ========== -->
   <link name="neck_yaw_link">
     <inertial>
-      <origin rpy="0 0 0" xyz="0 0 0.01"/>
-      <mass value="0.1"/>
-      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      <origin rpy="0 0 0" xyz="-0.000232155049410487 -0.000686932388815892 0.0356746841654919"/>
+      <mass value="0.693"/>
+      <inertia ixx="0.000343" ixy="-4.52e-12" ixz="1.57e-05" iyy="0.000324" iyz="-1.15e-10" izz="0.000263"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -437,18 +429,18 @@
   <link name="head_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0.05"/>
-      <mass value="0.5"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.004" ixy="0" ixz="0" iyy="0.004" iyz="0" izz="0.004"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/head.stl"/>
+        <mesh filename="../meshes/HEAD.STL"/>
       </geometry>
       <material name="LightGrey"/>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0.05"/>
+      <origin rpy="0 0 0" xyz="0.03 0 0.02"/>
       <geometry>
         <box size="0.2 0.16 0.12"/>
       </geometry>
@@ -459,10 +451,9 @@
     <parent link="neck_yaw_link"/>
     <child link="head_link"/>
     <axis xyz="0 1 0"/>
-    <limit effort="20" lower="-0.5" upper="0.5" velocity="5"/>
+    <limit effort="20" lower="-0.785398" upper="0.785398" velocity="5"/>
     <dynamics armature="0.001" damping="0.0565" friction="0.08"/>
   </joint>
-  <!-- ========== RIGHT ARM ========== -->
   <link name="right_shoulder_pitch_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.000129810971033137 -0.0157921829692733 -1.88616919207796E-05"/>
@@ -559,12 +550,11 @@
     <limit effort="60" lower="-2.443" upper="0" velocity="6"/>
     <dynamics armature="0.01" damping="0.0282528" friction="0.08"/>
   </joint>
-  <!-- GAP 2 FIX: Inflated wrist mass and inertia for stability -->
   <link name="right_wrist_yaw_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00382289129248181 8.36540312021405E-09 -0.00320778585722904"/>
-      <mass value="0.15"/>
-      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+      <mass value="0.0580595106779709"/>
+      <inertia ixx="1.18803001723724E-05" ixy="3.73796867740447E-08" ixz="-3.06346018877142E-06" iyy="8.8546080362749E-06" iyz="4.45423430732884E-08" izz="1.07999391749915E-05"/>
     </inertial>
     <visual>
       <geometry>
@@ -581,7 +571,6 @@
     <limit effort="30" lower="-3.141" upper="3.141" velocity="8"/>
     <dynamics armature="0.001" damping="0.0282528" friction="0.08"/>
   </joint>
-  <!-- ========== LEFT ARM ========== -->
   <link name="left_shoulder_pitch_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.000159889483543337 0.015791587441366 -3.48203187672258E-07"/>
@@ -678,12 +667,11 @@
     <limit effort="60" lower="0" upper="2.443" velocity="6"/>
     <dynamics armature="0.01" damping="0.0282528" friction="0.08"/>
   </joint>
-  <!-- GAP 2 FIX: Inflated wrist mass and inertia for stability -->
   <link name="left_wrist_yaw_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00382289324376062 1.7394452961339E-08 -0.00320774203668756"/>
-      <mass value="0.15"/>
-      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+      <mass value="0.058058790654763"/>
+      <inertia ixx="1.20674298017884E-05" ixy="1.83335345917148E-07" ixz="-2.8402536561247E-06" iyy="8.40130139890341E-06" iyz="2.18479301532613E-07" izz="1.10658034937549E-05"/>
     </inertial>
     <visual>
       <geometry>
@@ -712,10 +700,14 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="../meshes/rh_f03_al_link_hand_wrist_part.stl" scale="1.0 1.0 1.0"/>
+        <box size="0.04 0.04 0.01"/>
       </geometry>
-      <origin rpy="1.57 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
     </collision>
+    <inertial>
+      <mass value="0.015"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+    </inertial>
   </link>
   <joint name="rh_wrist_plate_joint" type="fixed">
     <origin rpy="-0.7854 3.14159 -1.5708" xyz="0 0 0"/>
@@ -734,9 +726,9 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="../meshes/rh_f03_al_palm.stl" scale="1.0 1.0 1.0"/>
+        <box size="0.09 0.03 0.06"/>
       </geometry>
-      <origin rpy="3.14 4.71 0.0" xyz="0.0 0.0162 0.030"/>
+      <origin rpy="0 0 0" xyz="0.0 0.0162 0.030"/>
     </collision>
     <inertial>
       <mass value="0.09"/>
@@ -758,7 +750,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_knuckle_index_joint" type="fixed">
@@ -782,12 +774,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_index_MCP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_knuckle_index"/>
     <child link="rh_index_MCP"/>
     <origin xyz="-0.0002 -0.00677 0.0538"/>
@@ -809,12 +802,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_index_PIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_index_MCP"/>
     <child link="rh_index_PIP"/>
     <origin xyz="0.0 -0.00208 0.02677"/>
@@ -838,18 +832,24 @@
     </collision>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="rh_index_DIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_index_PIP"/>
     <child link="rh_index_DIP"/>
     <origin xyz="0.0 0.0 0.0233"/>
     <mimic joint="rh_pris_index_joint" multiplier="100.00" offset="0.0"/>
   </joint>
-  <link name="rh_ee_index_link"/>
+  <link name="rh_ee_index_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+    </inertial>
+  </link>
   <joint name="rh_ee_index_joint" type="fixed">
     <parent link="rh_index_DIP"/>
     <child link="rh_ee_index_link"/>
@@ -867,7 +867,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_index_joint" type="fixed">
@@ -885,12 +885,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_index_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="rh_motor_index"/>
     <child link="rh_pris_index"/>
     <origin rpy="1.57 0 0" xyz="0.0 0.03 0.0"/>
@@ -905,7 +905,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_knuckle_middle_joint" type="fixed">
@@ -929,12 +929,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_middle_MCP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_knuckle_middle"/>
     <child link="rh_middle_MCP"/>
     <origin xyz="-0.0002 -0.00677 0.0538"/>
@@ -956,12 +957,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_middle_PIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_middle_MCP"/>
     <child link="rh_middle_PIP"/>
     <origin xyz="0.0 -0.00208 0.02677"/>
@@ -985,18 +987,24 @@
     </collision>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="rh_middle_DIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_middle_PIP"/>
     <child link="rh_middle_DIP"/>
     <origin xyz="0.0 0.0 0.0233"/>
     <mimic joint="rh_pris_middle_joint" multiplier="100.00" offset="0.0"/>
   </joint>
-  <link name="rh_ee_middle_link"/>
+  <link name="rh_ee_middle_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+    </inertial>
+  </link>
   <joint name="rh_ee_middle_joint" type="fixed">
     <parent link="rh_middle_DIP"/>
     <child link="rh_ee_middle_link"/>
@@ -1014,7 +1022,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_middle_joint" type="fixed">
@@ -1032,12 +1040,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_middle_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="rh_motor_middle"/>
     <child link="rh_pris_middle"/>
     <origin rpy="1.57 0 0" xyz="0.0 0.03 0.0"/>
@@ -1052,7 +1060,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_knuckle_ring_joint" type="fixed">
@@ -1076,12 +1084,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_ring_MCP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_knuckle_ring"/>
     <child link="rh_ring_MCP"/>
     <origin xyz="-0.0002 -0.00677 0.0538"/>
@@ -1103,12 +1112,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_ring_PIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_ring_MCP"/>
     <child link="rh_ring_PIP"/>
     <origin xyz="0.0 -0.00208 0.02677"/>
@@ -1132,18 +1142,24 @@
     </collision>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="rh_ring_DIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_ring_PIP"/>
     <child link="rh_ring_DIP"/>
     <origin xyz="0.0 0.0 0.0233"/>
     <mimic joint="rh_pris_ring_joint" multiplier="100.00" offset="0.0"/>
   </joint>
-  <link name="rh_ee_ring_link"/>
+  <link name="rh_ee_ring_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+    </inertial>
+  </link>
   <joint name="rh_ee_ring_joint" type="fixed">
     <parent link="rh_ring_DIP"/>
     <child link="rh_ee_ring_link"/>
@@ -1161,7 +1177,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_ring_joint" type="fixed">
@@ -1179,12 +1195,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_ring_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="rh_motor_ring"/>
     <child link="rh_pris_ring"/>
     <origin rpy="1.57 0 0" xyz="0.0 0.03 0.0"/>
@@ -1199,7 +1215,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_knuckle_little_joint" type="fixed">
@@ -1223,12 +1239,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_little_MCP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_knuckle_little"/>
     <child link="rh_little_MCP"/>
     <origin xyz="-0.0002 -0.00677 0.0538"/>
@@ -1250,12 +1267,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_little_PIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_little_MCP"/>
     <child link="rh_little_PIP"/>
     <origin xyz="0.0 -0.00208 0.02677"/>
@@ -1279,18 +1297,24 @@
     </collision>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="rh_little_DIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_little_PIP"/>
     <child link="rh_little_DIP"/>
     <origin xyz="0.0 0.0 0.0233"/>
     <mimic joint="rh_pris_little_joint" multiplier="100.00" offset="0.0"/>
   </joint>
-  <link name="rh_ee_little_link"/>
+  <link name="rh_ee_little_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+    </inertial>
+  </link>
   <joint name="rh_ee_little_joint" type="fixed">
     <parent link="rh_little_DIP"/>
     <child link="rh_ee_little_link"/>
@@ -1308,7 +1332,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_little_joint" type="fixed">
@@ -1326,12 +1350,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_little_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="rh_motor_little"/>
     <child link="rh_pris_little"/>
     <origin rpy="1.57 0 0" xyz="0.0 0.03 0.0"/>
@@ -1346,7 +1370,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_knuckle_thumb_joint" type="fixed">
@@ -1370,12 +1394,13 @@
     </collision>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_thumb_jo_joint" type="revolute">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="1.8" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.8" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_knuckle_thumb"/>
     <child link="rh_thumb_joint"/>
     <origin rpy="0.0 0.0 -0.6021" xyz="-0.0558 -0.00675 0.0"/>
@@ -1397,12 +1422,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_thumb_MCP_joint" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_thumb_joint"/>
     <child link="rh_thumb_MCP"/>
     <origin rpy="0.0 0.4538 0.0" xyz="-0.031 -0.0055 0.0"/>
@@ -1426,18 +1452,24 @@
     </collision>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="rh_thumb_DIP_joint" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="10.0" lower="0.0" upper="0.8" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="0.8" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="rh_thumb_MCP"/>
     <child link="rh_thumb_DIP"/>
     <origin rpy="0.0 0.0 0.0" xyz="-0.0298 0.0 -0.0042"/>
     <mimic joint="rh_pris_thumb_DIP_joint" multiplier="100.00" offset="0.0"/>
   </joint>
-  <link name="rh_ee_thumb_link"/>
+  <link name="rh_ee_thumb_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+    </inertial>
+  </link>
   <joint name="rh_ee_th_joint" type="fixed">
     <parent link="rh_thumb_DIP"/>
     <child link="rh_ee_thumb_link"/>
@@ -1453,7 +1485,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_thumb_jo_joint" type="fixed">
@@ -1471,12 +1503,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_thumb_jo_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="rh_motor_thumb_jo"/>
     <child link="rh_pris_thumb_jo"/>
     <origin rpy="1.57 0 0" xyz="0.0 -0.015 0.0"/>
@@ -1491,7 +1523,7 @@
     </visual>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="rh_motor_thumb_DIP_joint" type="fixed">
@@ -1509,12 +1541,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_thumb_DIP_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="rh_motor_thumb_DIP"/>
     <child link="rh_pris_thumb_DIP"/>
     <origin rpy="1.57 0 0" xyz="0.0 -0.015 0.0"/>
@@ -1531,10 +1563,14 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="../meshes/lh_f03_al_link_hand_wrist_part.stl" scale="1.0 1.0 1.0"/>
+        <box size="0.04 0.04 0.01"/>
       </geometry>
-      <origin rpy="-1.57 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
     </collision>
+    <inertial>
+      <mass value="0.015"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+    </inertial>
   </link>
   <joint name="lh_wrist_plate_joint" type="fixed">
     <origin rpy="0.7854 3.14159 1.5708" xyz="0 0 0"/>
@@ -1553,9 +1589,9 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="../meshes/lh_f03_al_palm.stl" scale="1.0 1.0 1.0"/>
+        <box size="0.09 0.03 0.06"/>
       </geometry>
-      <origin rpy="-3.14 4.71 0.0" xyz="0.0 -0.0162 0.030"/>
+      <origin rpy="0 0 0" xyz="0.0 -0.0162 0.030"/>
     </collision>
     <inertial>
       <mass value="0.09"/>
@@ -1577,7 +1613,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_knuckle_index_joint" type="fixed">
@@ -1601,12 +1637,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_index_MCP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_knuckle_index"/>
     <child link="lh_index_MCP"/>
     <origin xyz="-0.0002 0.00677 0.0538"/>
@@ -1628,12 +1665,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_index_PIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_index_MCP"/>
     <child link="lh_index_PIP"/>
     <origin xyz="0.0 0.00208 0.02677"/>
@@ -1657,18 +1695,24 @@
     </collision>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="lh_index_DIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_index_PIP"/>
     <child link="lh_index_DIP"/>
     <origin xyz="0.0 0.0 0.0233"/>
     <mimic joint="lh_pris_index_joint" multiplier="100.00" offset="0.0"/>
   </joint>
-  <link name="lh_ee_index_link"/>
+  <link name="lh_ee_index_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+    </inertial>
+  </link>
   <joint name="lh_ee_index_joint" type="fixed">
     <parent link="lh_index_DIP"/>
     <child link="lh_ee_index_link"/>
@@ -1686,7 +1730,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_index_joint" type="fixed">
@@ -1704,12 +1748,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_index_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="lh_motor_index"/>
     <child link="lh_pris_index"/>
     <origin rpy="-1.57 0 0" xyz="0.0 -0.03 0.0"/>
@@ -1724,7 +1768,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_knuckle_middle_joint" type="fixed">
@@ -1748,12 +1792,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_middle_MCP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_knuckle_middle"/>
     <child link="lh_middle_MCP"/>
     <origin xyz="-0.0002 0.00677 0.0538"/>
@@ -1775,12 +1820,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_middle_PIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_middle_MCP"/>
     <child link="lh_middle_PIP"/>
     <origin xyz="0.0 0.00208 0.02677"/>
@@ -1804,18 +1850,24 @@
     </collision>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="lh_middle_DIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_middle_PIP"/>
     <child link="lh_middle_DIP"/>
     <origin xyz="0.0 0.0 0.0233"/>
     <mimic joint="lh_pris_middle_joint" multiplier="100.00" offset="0.0"/>
   </joint>
-  <link name="lh_ee_middle_link"/>
+  <link name="lh_ee_middle_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+    </inertial>
+  </link>
   <joint name="lh_ee_middle_joint" type="fixed">
     <parent link="lh_middle_DIP"/>
     <child link="lh_ee_middle_link"/>
@@ -1833,7 +1885,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_middle_joint" type="fixed">
@@ -1851,12 +1903,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_middle_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="lh_motor_middle"/>
     <child link="lh_pris_middle"/>
     <origin rpy="-1.57 0 0" xyz="0.0 -0.03 0.0"/>
@@ -1871,7 +1923,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_knuckle_ring_joint" type="fixed">
@@ -1895,12 +1947,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_ring_MCP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_knuckle_ring"/>
     <child link="lh_ring_MCP"/>
     <origin xyz="-0.0002 0.00677 0.0538"/>
@@ -1922,12 +1975,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_ring_PIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_ring_MCP"/>
     <child link="lh_ring_PIP"/>
     <origin xyz="0.0 0.00208 0.02677"/>
@@ -1951,18 +2005,24 @@
     </collision>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="lh_ring_DIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_ring_PIP"/>
     <child link="lh_ring_DIP"/>
     <origin xyz="0.0 0.0 0.0233"/>
     <mimic joint="lh_pris_ring_joint" multiplier="100.00" offset="0.0"/>
   </joint>
-  <link name="lh_ee_ring_link"/>
+  <link name="lh_ee_ring_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+    </inertial>
+  </link>
   <joint name="lh_ee_ring_joint" type="fixed">
     <parent link="lh_ring_DIP"/>
     <child link="lh_ee_ring_link"/>
@@ -1980,7 +2040,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_ring_joint" type="fixed">
@@ -1998,12 +2058,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_ring_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="lh_motor_ring"/>
     <child link="lh_pris_ring"/>
     <origin rpy="-1.57 0 0" xyz="0.0 -0.03 0.0"/>
@@ -2018,7 +2078,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_knuckle_little_joint" type="fixed">
@@ -2042,12 +2102,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_little_MCP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.3" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_knuckle_little"/>
     <child link="lh_little_MCP"/>
     <origin xyz="-0.0002 0.00677 0.0538"/>
@@ -2069,12 +2130,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_little_PIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_little_MCP"/>
     <child link="lh_little_PIP"/>
     <origin xyz="0.0 0.00208 0.02677"/>
@@ -2098,18 +2160,24 @@
     </collision>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="lh_little_DIP_joint" type="revolute">
     <axis xyz="-1 0 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_little_PIP"/>
     <child link="lh_little_DIP"/>
     <origin xyz="0.0 0.0 0.0233"/>
     <mimic joint="lh_pris_little_joint" multiplier="100.00" offset="0.0"/>
   </joint>
-  <link name="lh_ee_little_link"/>
+  <link name="lh_ee_little_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+    </inertial>
+  </link>
   <joint name="lh_ee_little_joint" type="fixed">
     <parent link="lh_little_DIP"/>
     <child link="lh_ee_little_link"/>
@@ -2127,7 +2195,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_little_joint" type="fixed">
@@ -2145,12 +2213,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_little_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="lh_motor_little"/>
     <child link="lh_pris_little"/>
     <origin rpy="-1.57 0 0" xyz="0.0 -0.03 0.0"/>
@@ -2165,7 +2233,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_knuckle_thumb_joint" type="fixed">
@@ -2189,12 +2257,13 @@
     </collision>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_thumb_jo_joint" type="revolute">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="1.8" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.8" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_knuckle_thumb"/>
     <child link="lh_thumb_joint"/>
     <origin rpy="0.0 0.0 0.6021" xyz="-0.0558 0.00675 0.0"/>
@@ -2216,12 +2285,13 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_thumb_MCP_joint" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="10.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="1.0" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_thumb_joint"/>
     <child link="lh_thumb_MCP"/>
     <origin rpy="0.0 0.4538 0.0" xyz="-0.031 0.0055 0.0"/>
@@ -2245,18 +2315,24 @@
     </collision>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="lh_thumb_DIP_joint" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="10.0" lower="0.0" upper="0.8" velocity="1.0"/>
+    <limit effort="3.0" lower="0.0" upper="0.8" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.1"/>
     <parent link="lh_thumb_MCP"/>
     <child link="lh_thumb_DIP"/>
     <origin rpy="0.0 0.0 0.0" xyz="-0.0298 0.0 -0.0042"/>
     <mimic joint="lh_pris_thumb_DIP_joint" multiplier="100.00" offset="0.0"/>
   </joint>
-  <link name="lh_ee_thumb_link"/>
+  <link name="lh_ee_thumb_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+    </inertial>
+  </link>
   <joint name="lh_ee_th_joint" type="fixed">
     <parent link="lh_thumb_DIP"/>
     <child link="lh_ee_thumb_link"/>
@@ -2272,7 +2348,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_thumb_jo_joint" type="fixed">
@@ -2290,12 +2366,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_thumb_jo_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="lh_motor_thumb_jo"/>
     <child link="lh_pris_thumb_jo"/>
     <origin rpy="-1.57 0 0" xyz="0.0 0.015 0.0"/>
@@ -2310,7 +2386,7 @@
     </visual>
     <inertial>
       <mass value="0.0025"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
     </inertial>
   </link>
   <joint name="lh_motor_thumb_DIP_joint" type="fixed">
@@ -2328,12 +2404,12 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-03" ixy="0.0" ixz="0.0" iyy="1.0e-03" iyz="0.0" izz="1.0e-03"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_thumb_DIP_joint" type="prismatic">
     <axis xyz="0 0 -1"/>
-    <limit effort="10.0" lower="0.0" upper="0.0103" velocity="0.1"/>
+    <limit effort="3.0" lower="0.0" upper="0.0103" velocity="0.1"/>
     <parent link="lh_motor_thumb_DIP"/>
     <child link="lh_pris_thumb_DIP"/>
     <origin rpy="-1.57 0 0" xyz="0.0 0.015 0.0"/>

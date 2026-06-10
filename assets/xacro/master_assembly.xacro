@@ -7,7 +7,6 @@
   <material name="DarkGrey"><color rgba="0.22 0.22 0.22 1.0" /></material>
   <material name="LightGrey"><color rgba="0.8 0.8 0.8 1.0" /></material>
 
-  <!-- ========== PELVIS ========== -->
   <link name="pelvis_link">
     <inertial>
       <origin xyz="-0.0540918323179141 -3.48259522403486E-05 -0.0156255182184312" rpy="0 0 0" />
@@ -26,7 +25,6 @@
     </collision>
   </link>
 
-  <!-- ========== LEFT LEG ========== -->
   <link name="left_hip_pitch_link">
     <inertial>
       <origin xyz="0.00172895433511948 0.0360563262466087 0.000569266739481308" rpy="0 0 0" />
@@ -45,7 +43,6 @@
     <parent link="pelvis_link" /><child link="left_hip_pitch_link" />
     <axis xyz="0 1 0" />
     <limit lower="-2.094" upper="1.0" effort="120" velocity="8" />
-    <!-- GAP 1 FIX: Added armature for gearbox inertia -->
     <dynamics damping="0.095625" friction="0.15" armature="0.02" />
   </joint>
 
@@ -149,7 +146,6 @@
       <inertia ixx="5.5351925218088e-05" ixy="0" ixz="0" iyy="3.65130809524718e-05" iyz="0" izz="8.54029969529202e-05" />
     </inertial>
     <visual><origin xyz="0 0.008 0" rpy="0 0 0" /><geometry><mesh filename="${mesh_dir}/LEFT_TOE.STL" /></geometry><material name="DarkGrey" /></visual>
-    <!-- GAP 3 FIX: Padded collision box to prevent floor clipping -->
     <collision name="left_toe_collision">
       <origin xyz="0.025 0 0.006" rpy="0 0 0" />
       <geometry><box size="0.05 0.06 0.02" /></geometry>
@@ -163,7 +159,6 @@
     <dynamics damping="0.001" friction="0.02" armature="0.001" />
   </joint>
 
-  <!-- ========== RIGHT LEG ========== -->
   <link name="right_hip_pitch_link">
     <inertial>
       <origin xyz="0.00172891543963928 -0.0360560777469901 0.000568830845064178" rpy="0 0 0" />
@@ -285,7 +280,6 @@
       <inertia ixx="5.5358948695321e-05" ixy="0" ixz="0" iyy="3.65052769951383e-05" iyz="0" izz="8.54017357052965e-05" />
     </inertial>
     <visual><origin xyz="0 -0.008 0" rpy="0 0 0" /><geometry><mesh filename="${mesh_dir}/RIGHT_TOE.STL" /></geometry><material name="DarkGrey" /></visual>
-    <!-- GAP 3 FIX: Padded collision box to prevent floor clipping -->
     <collision name="right_toe_collision">
       <origin xyz="0.025 0 0.006" rpy="0 0 0" />
       <geometry><box size="0.05 0.06 0.02" /></geometry>
@@ -299,7 +293,6 @@
     <dynamics damping="0.001" friction="0.02" armature="0.001" />
   </joint>
 
-  <!-- ========== UPPER BODY ========== -->
   <link name="waist_yaw_link">
     <inertial>
       <origin xyz="-0.00699393636668848 -2.50812125574469E-05 0.20403987801712" rpy="0 0 0" />
@@ -321,12 +314,14 @@
     <dynamics damping="0.095625" friction="0.15" armature="0.02" />
   </joint>
 
-  <!-- ========== NECK & HEAD ========== -->
   <link name="neck_yaw_link">
     <inertial>
-      <origin xyz="0 0 0.01" rpy="0 0 0" />
-      <mass value="0.1" />
-      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001" />
+      <origin xyz="-0.000232155049410487 -0.000686932388815892 0.0356746841654919" rpy="0 0 0" />
+      
+      <mass value="0.693" />
+      
+      <inertia ixx="0.000343" ixy="-4.52e-12" ixz="1.57e-05" 
+               iyy="0.000324" iyz="-1.15e-10" izz="0.000263" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -345,16 +340,17 @@
   <link name="head_link">
     <inertial>
       <origin xyz="0 0 0.05" rpy="0 0 0" />
-      <mass value="0.5" />
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      <mass value="1.0" />
+      <inertia ixx="0.004" ixy="0" ixz="0" 
+               iyy="0.004" iyz="0" izz="0.004" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry><mesh filename="${mesh_dir}/head.stl" /></geometry>
+      <geometry><mesh filename="${mesh_dir}/HEAD.STL" /></geometry>
       <material name="LightGrey" />
     </visual>
     <collision>
-      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <origin xyz="0.03 0 0.02" rpy="0 0 0" />
       <geometry><box size="0.2 0.16 0.12" /></geometry>
     </collision>
   </link>
@@ -362,11 +358,10 @@
     <origin xyz="0 0 0.0373499999999998" rpy="0 0 0" />
     <parent link="neck_yaw_link" /><child link="head_link" />
     <axis xyz="0 1 0" />
-    <limit lower="-0.5" upper="0.5" effort="20" velocity="5" />
+    <limit lower="-0.785398" upper="0.785398" effort="20" velocity="5" />
     <dynamics damping="0.0565" friction="0.08" armature="0.001" />
   </joint>
 
-  <!-- ========== RIGHT ARM ========== -->
   <link name="right_shoulder_pitch_link">
     <inertial>
       <origin xyz="0.000129810971033137 -0.0157921829692733 -1.88616919207796E-05" rpy="0 0 0" />
@@ -443,12 +438,12 @@
     <dynamics damping="0.0282528" friction="0.08" armature="0.01" />
   </joint>
 
-  <!-- GAP 2 FIX: Inflated wrist mass and inertia for stability -->
   <link name="right_wrist_yaw_link">
     <inertial>
       <origin xyz="0.00382289129248181 8.36540312021405E-09 -0.00320778585722904" rpy="0 0 0" />
-      <mass value="0.15" />
-      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
+      <mass value="0.0580595106779709" />
+      <inertia ixx="1.18803001723724E-05" ixy="3.73796867740447E-08" ixz="-3.06346018877142E-06" 
+               iyy="8.8546080362749E-06" iyz="4.45423430732884E-08" izz="1.07999391749915E-05" />
     </inertial>
     <visual><geometry><mesh filename="${mesh_dir}/RIGHT_WRIST_YAW.STL" /></geometry><material name="Grey" /></visual>
   </link>
@@ -460,7 +455,6 @@
     <dynamics damping="0.0282528" friction="0.08" armature="0.001" />
   </joint>
 
-  <!-- ========== LEFT ARM ========== -->
   <link name="left_shoulder_pitch_link">
     <inertial>
       <origin xyz="0.000159889483543337 0.015791587441366 -3.48203187672258E-07" rpy="0 0 0" />
@@ -537,12 +531,12 @@
     <dynamics damping="0.0282528" friction="0.08" armature="0.01" />
   </joint>
 
-  <!-- GAP 2 FIX: Inflated wrist mass and inertia for stability -->
   <link name="left_wrist_yaw_link">
     <inertial>
       <origin xyz="0.00382289324376062 1.7394452961339E-08 -0.00320774203668756" rpy="0 0 0" />
-      <mass value="0.15" />
-      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
+      <mass value="0.058058790654763" />
+      <inertia ixx="1.20674298017884E-05" ixy="1.83335345917148E-07" ixz="-2.8402536561247E-06" 
+               iyy="8.40130139890341E-06" iyz="2.18479301532613E-07" izz="1.10658034937549E-05" />
     </inertial>
     <visual><geometry><mesh filename="${mesh_dir}/LEFT_WRIST_YAW.STL" /></geometry><material name="Grey" /></visual>
   </link>
@@ -554,14 +548,13 @@
     <dynamics damping="0.0282528" friction="0.08" armature="0.001" />
   </joint>
 
-<xacro:include filename="hri_hand.xacro" />
+  <xacro:include filename="hri_hand.xacro" />
 
   <xacro:hri_hand 
       prefix="rh_" 
       reflect="1"
       parent="right_wrist_yaw_link" 
       mesh_dir="../meshes">
-      
       <origin xyz="0 0 0" rpy="-0.7854 3.14159 -1.5708" />
   </xacro:hri_hand>
 
@@ -570,7 +563,6 @@
       reflect="-1"
       parent="left_wrist_yaw_link" 
       mesh_dir="../meshes">
-      
       <origin xyz="0 0 0" rpy="0.7854 3.14159 1.5708" />
   </xacro:hri_hand>
 
