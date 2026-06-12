@@ -361,6 +361,8 @@ class RevExAseEventsCfg:
 
     rsi_pose = EventTermCfg(func=custom_mdp.reset_to_reference_pose, mode="reset")
 
+    sample_style = EventTermCfg(func=custom_mdp.sample_ase_style, mode="reset")
+
 # ------------------------------------------------------------------
 # 7. CURRICULUM
 # ------------------------------------------------------------------

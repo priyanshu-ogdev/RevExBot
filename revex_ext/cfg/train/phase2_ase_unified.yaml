@@ -1,0 +1,37 @@
+phase: 2
+num_envs: 4096
+rollout_steps: 96
+total_iterations: 15000
+learning_epochs: 4
+mini_batch_size: 1024
+
+policy_optimizer:
+  type: SGD
+  lr: 1.0e-3
+  momentum: 0.9
+  weight_decay: 1.0e-5
+
+discriminator_optimizer:
+  type: SGD
+  lr: 1.0e-4
+  momentum: 0.9
+  weight_decay: 1.0e-5
+
+ppo:
+  gamma: 0.99
+  lam: 0.95
+  clip_param: 0.2
+  value_loss_coef: 0.5
+  entropy_coef: 0.01
+  use_clipped_value_loss: true
+  value_clip_param: 0.2
+
+ase_mechanics:
+  discriminator_accuracy_threshold: 0.85
+  style_reward_weight: 1.0
+  kl_anneal:
+    start: 0.0
+    end: 1.0e-3
+    fraction: 0.20
+
+mixed_precision: true

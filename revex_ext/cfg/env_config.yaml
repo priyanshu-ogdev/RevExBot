@@ -1,46 +1,25 @@
-# cfg/env_config.yaml
-# THE MASTER FORGE CONFIGURATION (RTX 6000 ADA)
+# ==============================================================================
+# RevEx ASE – Master Environment Configuration
+# Optimised for: Intel Core i9 | 128 GB RAM | RTX A6000 Ada 48 GB
+# ==============================================================================
 
-system:
-  active_hardware: "rtx_6000_ada"
-  # 🚨 STRICT MEMORY CONTROL: Forces PyTorch to release cached memory back to the OS 
-  # before handing the GPU from the Vision Daemon to Isaac Lab.
-  force_vram_flush_between_phases: true
+hardware:
+  gpu: "rtx_6000_ada"
+  vram_gb: 48
+  system_ram_gb: 128
+  mixed_precision: true
+  intra_op_threads: 24          # match physical P‑cores
+  inter_op_threads: 4
+  cache_library_in_ram: true    # pre‑loads entire motion library into RAM
+  pin_gpu_memory: true          # non‑blocking pinned memory transfers
 
-cluster_paths:
-  drop_zone: "raw_media/"                  # External ingest for .mp4 files
-  processed_kinematics: "data/motions/"    # Destination for AMP .npy manifolds
-  registry_json: "data/expert_registry.json"
-  job_queue_json: "data/job_queue.json"
-  weights_dir: "data/weights/"             # Immutable storage for frozen .pth experts
-  eval_videos: "data/eval_videos/"
+paths:
+  raw_media: "raw_media/"                           # input videos for data pipeline
+  motion_library: "data/unified_motion_library.json" # output of pipeline / input to Phase 2
+  checkpoints: "checkpoints/"
+  tensorboard: "runs/"
+  logs: "logs/"
 
-evaluation:
-  eval_episodes: 20
-  render_headless: True
-  min_success_rate: 0.95 
-
-vlm_orchestration:
-  model_id: "Qwen/Qwen2.5-VL-3B-Instruct"
-  # 🚨 ADA UPGRADE: Doubled temporal resolution. 48GB VRAM easily absorbs 
-  # the massive KV cache required for 16-frame kinematic extraction.
-  max_frames_per_video: 16 
-  context_window: 8192
-
-profiles:
-  rtx_6000_ada:
-    role: "unified_master_forge"
-    max_vram_gb: 48
-    system_ram_gb: 128
-    use_mixed_precision: true   
-    # 🚨 SYSTEM SCALE: High thread count to prevent CPU bottlenecking 
-    # when caching 2M transition buffers into the 128GB System RAM.
-    intra_op_threads: 24 
-
-moe_architecture:
-  base_locomotion_policy: "data/weights/expert_loco_v1.pth"
-  base_agile_policy: "data/weights/expert_agile_v1.pth"
-  # 🚨 ROUTER STABILIZATION: Increased distillation epochs. With 16k envs, 
-  # the SKRL router needs slightly more time to cleanly balance expert gating.
-  router_distillation_epochs: 100 
-  router_save_path: "runs/phase3/router/nn/"
+physics:
+  sim_dt: 0.005                 # 200 Hz physics
+  decimation: 4                 # 50 Hz policy (20 ms control loop)

@@ -1,0 +1,23 @@
+phase: 1
+num_envs: 8192
+rollout_steps: 64
+total_iterations: 15000
+learning_epochs: 4
+mini_batch_size: 2048
+
+policy_optimizer:
+  type: SGD
+  lr: 1.0e-3
+  momentum: 0.9
+  weight_decay: 1.0e-5
+
+ppo:
+  gamma: 0.99
+  lam: 0.95
+  clip_param: 0.2
+  value_loss_coef: 0.5
+  entropy_coef: 0.01
+  use_clipped_value_loss: true
+  value_clip_param: 0.2
+
+mixed_precision: true

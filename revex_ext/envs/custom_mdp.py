@@ -2,6 +2,8 @@
 ASE-aligned Custom MDP functions for RevExBot.
 Contains ONLY genuinely custom logic that has no stable mdp equivalent.
 All standard observations, rewards, and events are delegated to omni.isaac.lab.envs.mdp.
+All domain-specific reward functions are fully vectorised — the dynamic modulators in
+revex_ase_env_cfg.py handle gating, so no string‑based skill_type checks remain.
 """
 import torch
 import torch.nn.functional as F
@@ -98,12 +100,14 @@ def get_interaction_vectors(env: ManagerBasedRLEnv, k: int = 5, dropout_prob: fl
 def get_auxiliary_sensor_array(env: ManagerBasedRLEnv, dropout_prob: float = 0.05) -> torch.Tensor:
     """64-dim spatial lidar (combat) or rhythm array (dance) with structured dropout."""
     data = _ase_data(env)
-    skill_type = data["skill_type"]
     output = torch.zeros((env.num_envs, 64), device=env.device)
-    if skill_type == "combat" and "spatial_awareness_raycaster" in env.scene.sensors:
-        output = env.scene.sensors["spatial_awareness_raycaster"].data.ray_hits_w
-    elif skill_type == "dance":
-        output = data["rhythm_array"]
+    if data["is_combat_mode"].any() and "spatial_awareness_raycaster" in env.scene.sensors:
+        # vectorised: only compute real values for combat envs
+        combat_mask = data["is_combat_mode"].float().unsqueeze(-1)
+        output = env.scene.sensors["spatial_awareness_raycaster"].data.ray_hits_w * combat_mask
+    if data["is_dance_mode"].any():
+        dance_mask = data["is_dance_mode"].float().unsqueeze(-1)
+        output = output + data["rhythm_array"] * dance_mask
     if env.training:
         mask = (torch.rand(env.num_envs, 1, device=env.device) > dropout_prob).float()
         output = output * mask
@@ -113,9 +117,29 @@ def get_auxiliary_sensor_array(env: ManagerBasedRLEnv, dropout_prob: float = 0.0
 # 4. STYLE REWARD & CONTACT SCHEDULE
 # ===================================================================
 def style_reward(env: ManagerBasedRLEnv) -> torch.Tensor:
-    """Wasserstein-style AMP reward: log σ(D(s,s',z)). Dense, non-vanishing gradients."""
-    disc_out = _ase_data(env)["disc_output"]
-    return torch.log(torch.sigmoid(disc_out) + 1e-6)
+    """
+    Computes the ASE style reward using the real‑time discriminator.
+    Uses an exponential positive bound [0, 1] to avoid suicide policies.
+    """
+    if not hasattr(env.unwrapped, "_discriminator") or env.unwrapped._discriminator is None:
+        return torch.zeros(env.num_envs, device=env.device)
+
+    s = env.unwrapped._last_state
+
+    # The environment has already stepped, so we fetch the fresh observation
+    policy_obs = env.observation_manager.compute()["policy"]
+    hist_len = env.cfg.observations.policy.history_length
+    s_next = policy_obs.view(env.num_envs, hist_len, -1)[:, -1, :]
+
+    z = _ase_data(env)["z"]
+
+    with torch.no_grad():
+        with torch.cuda.amp.autocast(enabled=True):
+            disc_logits = env.unwrapped._discriminator(s, s_next, z).squeeze(-1)
+
+    p_real = torch.sigmoid(disc_logits)
+    # Strictly positive reward, bounded in [exp(-2), 1]
+    return torch.exp(-2.0 * torch.clamp(1.0 - p_real, min=0.0))
 
 def track_contact_schedule(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg, threshold: float = 1.0) -> torch.Tensor:
     """Penalises mismatch between desired contacts (from mocap) and actual foot contact states."""
@@ -141,9 +165,6 @@ def contact_strike_reward(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg, ta
     robot = env.scene["robot"]
     
     force_mag = torch.norm(sensor.data.net_forces_w, dim=-1).sum(dim=1)
-    
-    # FIX: body_vel_w is (N, B, 6) [lin_x, lin_y, lin_z, ang_x, ang_y, ang_z]. 
-    # We slice [:, :, :3] to isolate pure linear velocity (m/s) and avoid mixing with rad/s.
     palm_idx = robot.find_bodies("rh_hand_palm")[0]
     wrist_lin_vel = robot.data.body_vel_w[:, palm_idx, :3]
     wrist_speed = torch.norm(wrist_lin_vel, dim=-1)
@@ -162,13 +183,11 @@ def reference_com_velocity_tracking(env: ManagerBasedRLEnv) -> torch.Tensor:
     return -error
 
 # ===================================================================
-# 6. DANCE REWARDS
+# 6. DANCE REWARDS (Fully Vectorised — Modulators handle gating)
 # ===================================================================
 def rhythm_synchronization_reward(env: ManagerBasedRLEnv) -> torch.Tensor:
     """Rewards peaks in joint velocity energy aligning with the musical beat."""
     data = _ase_data(env)
-    if data["skill_type"] != "dance":
-        return torch.zeros(env.num_envs, device=env.device)
     beat = data["rhythm_array"][:, 0]
     joint_energy = torch.norm(env.scene["robot"].data.joint_vel, dim=-1)
     alignment = joint_energy * torch.clamp(beat, min=0.0)
@@ -177,8 +196,6 @@ def rhythm_synchronization_reward(env: ManagerBasedRLEnv) -> torch.Tensor:
 def formation_harmony_reward(env: ManagerBasedRLEnv) -> torch.Tensor:
     """Penalises deviation from virtual formation offsets."""
     data = _ase_data(env)
-    if data["skill_type"] != "dance":
-        return torch.zeros(env.num_envs, device=env.device)
     anchors = data["interaction_vectors"][:, :15].view(-1, 5, 3)
     dists = torch.norm(anchors, dim=-1)
     return -torch.exp(-torch.square(dists - 1.3) / 0.2).mean(dim=-1)
@@ -193,12 +210,12 @@ def angular_fluidity_penalty(env: ManagerBasedRLEnv) -> torch.Tensor:
     return ang_acc
 
 # ===================================================================
-# 7. PRECISION REWARDS
+# 7. PRECISION REWARDS (Fully Vectorised — Modulators handle gating)
 # ===================================================================
 def palm_alignment_reward(env: ManagerBasedRLEnv) -> torch.Tensor:
     """Rewards aligning the palm's outward normal with the vector to the target."""
     data = _ase_data(env)
-    if data["skill_type"] != "precision" or "target_object" not in env.scene.rigid_objects:
+    if "target_object" not in env.scene.rigid_objects:
         return torch.zeros(env.num_envs, device=env.device)
     robot = env.scene["robot"]
     target = env.scene.rigid_objects["target_object"]
@@ -207,7 +224,6 @@ def palm_alignment_reward(env: ManagerBasedRLEnv) -> torch.Tensor:
     target_pos = target.data.root_pos_w
     vec_to_target = F.normalize(target_pos - palm_pos + 1e-6, dim=-1)
 
-    # Optimized Hamilton quaternion rotation for local Z-axis [0, 0, 1]
     palm_quat = robot.data.body_quat_w[:, palm_idx, :]
     q_w, q_vec = palm_quat[:, 0:1], palm_quat[:, 1:4]
     v = torch.tensor([0.0, 0.0, 1.0], device=env.device).expand(env.num_envs, -1)
@@ -221,14 +237,12 @@ def palm_alignment_reward(env: ManagerBasedRLEnv) -> torch.Tensor:
 def soft_grasp_impedance_reward(env: ManagerBasedRLEnv, slip_margin: float = 1.2) -> torch.Tensor:
     """Penalises over-/under-gripping by comparing wrist force to ideal grip force."""
     data = _ase_data(env)
-    if data["skill_type"] != "precision" or "wrist_contact_sensor" not in env.scene.sensors:
+    if "wrist_contact_sensor" not in env.scene.sensors:
         return torch.zeros(env.num_envs, device=env.device)
     sensor = env.scene.sensors["wrist_contact_sensor"]
     target = env.scene.rigid_objects["target_object"]
     
     total_force = torch.norm(sensor.data.net_forces_w, dim=-1).sum(dim=1)
-    
-    # FIX: Safe, version-agnostic mass fetch for Isaac Lab RigidObject
     obj_mass = getattr(target.data, 'root_mass', getattr(target.data, 'mass', torch.ones(env.num_envs, 1, device=env.device)))
     object_mass = obj_mass.squeeze(-1)
     
@@ -242,7 +256,6 @@ def soft_grasp_impedance_reward(env: ManagerBasedRLEnv, slip_margin: float = 1.2
 def angular_momentum_conservation_reward(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> torch.Tensor:
     """Penalises changes in total angular momentum around the vertical axis."""
     robot = env.scene[asset_cfg.name]
-    # root_inertia_w is (num_envs, 3, 3). We take the Z-Z component.
     ang_mom_z = robot.data.root_ang_vel_w[:, 2] * robot.data.root_inertia_w[:, 2, 2]
 
     if not hasattr(env, "_prev_ang_mom_z"):
@@ -306,7 +319,7 @@ def arm_swing_symmetry(env: ManagerBasedRLEnv, left_arm_cfg: SceneEntityCfg, rig
     return -symmetry_error
 
 # ===================================================================
-# 10. REFERENCE STATE INITIALIZATION (RSI) & EVENTS
+# 10. EVENTS (RSI, Target Spawning, Style Sampling)
 # ===================================================================
 def reset_to_reference_pose(env: ManagerBasedRLEnv, env_ids: torch.Tensor) -> None:
     """Reset joint positions and velocities to the first frame of the active mocap clip."""
@@ -340,6 +353,11 @@ def apply_weapon_physics(env: ManagerBasedRLEnv, env_ids: torch.Tensor) -> None:
     palm_idx = robot.find_bodies("rh_hand_palm")[0]
     palm_pos = robot.data.body_pos_w[env_ids, palm_idx, :]
     weapon.write_root_pose_to_sim(palm_pos, env_ids=env_ids)
+
+def sample_ase_style(env: ManagerBasedRLEnv, env_ids: torch.Tensor) -> None:
+    """Trigger motion library sampling on environment reset (Phase 2)."""
+    if hasattr(env, "motion_library_manager"):
+        env.motion_library_manager.sample(env, env_ids)
 
 # ===================================================================
 # 11. DISCRIMINATOR TASK-SPACE BIAS (training-loop utility)

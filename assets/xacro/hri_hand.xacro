@@ -10,11 +10,13 @@
     <xacro:property name="pris_y" value="0.005" />
     <xacro:property name="pris_z" value="0.025" />
 
+    <xacro:property name="safe_min_mass" value="0.01" />
+    <xacro:property name="safe_inertia" value="1.0e-05" />
+
     <xacro:property name="knucle_mass" value="0.010" />
     <xacro:property name="MCP_mass" value="0.0125" />
     <xacro:property name="PIP_mass" value="0.0125" />
-    <xacro:property name="DIP_mass" value="0.0025" />
-    <xacro:property name="motor_mass" value="0.015" />
+    <xacro:property name="DIP_mass" value="${safe_min_mass}" /> <xacro:property name="motor_mass" value="0.015" />
     <xacro:property name="safe_dummy_mass" value="0.015" />
 
     <xacro:property name="motor_joint_x" value="0.0" />
@@ -36,7 +38,7 @@
       </collision>
       <inertial>
         <mass value="0.015"/>
-        <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" />
+        <inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" />
       </inertial>
     </link>
 
@@ -78,7 +80,7 @@
         </visual>
         <inertial>
           <mass value="${knucle_mass}"/>
-          <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" />
+          <inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" />
         </inertial>
       </link>
       <joint name="${prefix}knuckle_${finger_name}_joint" type="fixed">
@@ -90,7 +92,7 @@
       <link name="${prefix}${finger_name}_MCP">
         <visual><geometry><mesh filename="${mesh_dir}/${prefix}f03_al_link_mcp.stl" scale="1.0 1.0 1.0"/></geometry><origin xyz="0.0 ${0.00415 * reflect} -0.00955" rpy="0.0 -1.57 ${3.14 * reflect}"/><material name="white"/></visual>
         <collision><geometry><box size="0.015 0.015 0.035"/></geometry><origin xyz="0.0 0.0 0.015" rpy="0 0 0"/></collision>
-        <inertial><mass value="${MCP_mass}"/><inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" /></inertial>
+        <inertial><mass value="${MCP_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
       </link>
       <joint name="${prefix}${finger_name}_MCP_joint" type="revolute">
         <axis xyz="-1 0 0"/>
@@ -104,7 +106,7 @@
       <link name="${prefix}${finger_name}_PIP">
         <visual><geometry><mesh filename="${mesh_dir}/${prefix}f03_al_link_pip.stl" scale="1.0 1.0 1.0"/></geometry><origin xyz="-0.0002 ${0.0093 * reflect} -0.00242" rpy="0.0 -1.57 ${3.14 * reflect}"/><material name="white"/></visual>
         <collision><geometry><box size="0.012 0.012 0.025"/></geometry><origin xyz="0.0 0.0 0.01" rpy="0 0 0"/></collision>
-        <inertial><mass value="${PIP_mass}"/><inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" /></inertial>
+        <inertial><mass value="${PIP_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
       </link>
       <joint name="${prefix}${finger_name}_PIP_joint" type="revolute">
         <axis xyz="-1 0 0"/>
@@ -118,7 +120,7 @@
       <link name="${prefix}${finger_name}_DIP">
         <visual><geometry><mesh filename="${mesh_dir}/${prefix}f03_al_link_dip.stl" scale="1.0 1.0 1.0"/></geometry><origin xyz="0.0 ${0.0075 * reflect} -0.0025" rpy="0.0 -1.57 ${3.14 * reflect}"/><material name="lightyellow"><color rgba="1.0 1.0 0.3 1.0"/></material></visual>
         <collision><geometry><box size="0.01 0.01 0.02"/></geometry><origin xyz="0.0 0.0 0.01" rpy="0 0 0"/></collision>
-        <inertial><mass value="${DIP_mass}"/><inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06" /></inertial>
+        <inertial><mass value="${DIP_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
       </link>
       <joint name="${prefix}${finger_name}_DIP_joint" type="revolute">
         <axis xyz="-1 0 0"/>
@@ -131,8 +133,8 @@
 
       <link name="${prefix}ee_${finger_name}_link">
         <inertial>
-          <mass value="0.001"/>
-          <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07" />
+          <mass value="${safe_min_mass}"/>
+          <inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" />
         </inertial>
       </link>
       <joint name="${prefix}ee_${finger_name}_joint" type="fixed">
@@ -142,7 +144,7 @@
 
       <link name="${prefix}motor_${finger_name}">
         <visual><geometry><box size="${motor_x} ${motor_y} ${motor_z}"/></geometry><origin xyz="0 ${0.02 * reflect} 0"/><material name="black"><color rgba="0.25 0.25 0.25 1"/></material></visual>
-        <inertial><mass value="${motor_mass}"/><inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" /></inertial>
+        <inertial><mass value="${motor_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
       </link>
       <joint name="${prefix}motor_${finger_name}_joint" type="fixed">
         <parent link="${prefix}knuckle_${finger_name}"/><child link="${prefix}motor_${finger_name}"/>
@@ -151,7 +153,7 @@
 
       <link name="${prefix}pris_${finger_name}">
         <visual><geometry><box size="${pris_x} ${pris_y} ${pris_z}"/></geometry><origin xyz="0 0 0"/><material name="black"/></visual>
-        <inertial><mass value="${safe_dummy_mass}"/><inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" /></inertial>
+        <inertial><mass value="${safe_dummy_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
       </link>
       <joint name="${prefix}pris_${finger_name}_joint" type="prismatic">
         <axis xyz="0 0 -1"/><limit effort="3.0" lower="0.0" upper="${motor_max_upper}" velocity="0.1"/>
@@ -171,7 +173,7 @@
         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 ${-3.14 * reflect}"/>
         <material name="white"/>
       </visual>
-      <inertial><mass value="${knucle_mass}"/><inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" /></inertial>
+      <inertial><mass value="${knucle_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
     </link>
     <joint name="${prefix}knuckle_thumb_joint" type="fixed">
       <parent link="${prefix}hand_palm"/><child link="${prefix}knuckle_thumb"/>
@@ -181,7 +183,7 @@
     <link name="${prefix}thumb_joint">
       <visual><geometry><mesh filename="${mesh_dir}/${prefix}f03_thumb_joint.stl" scale="1.0 1.0 1.0"/></geometry><origin xyz="0 0 -0.005" rpy="0 0 ${3.14 * reflect}"/><material name="white"/></visual>
       <collision><geometry><box size="0.015 0.015 0.02"/></geometry><origin xyz="0 0 0" rpy="0 0 0"/></collision>
-      <inertial><mass value="${motor_mass}"/><inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" /></inertial>
+      <inertial><mass value="${motor_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
     </link>
     <joint name="${prefix}thumb_jo_joint" type="revolute">
       <axis xyz="0 0 -1"/>
@@ -195,7 +197,7 @@
     <link name="${prefix}thumb_MCP">
       <visual><geometry><mesh filename="${mesh_dir}/${prefix}f03_al_link_mcp.stl" scale="1.0 1.0 1.0"/></geometry><origin xyz="0.00955 0.0 0.00415" rpy="${-1.57 * reflect} 0 ${3.14 * reflect}"/><material name="white"/></visual>
       <collision><geometry><box size="0.015 0.015 0.035"/></geometry><origin xyz="0 0 0" rpy="0 0 0"/></collision>
-      <inertial><mass value="${MCP_mass}"/><inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" /></inertial>
+      <inertial><mass value="${MCP_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
     </link>
     <joint name="${prefix}thumb_MCP_joint" type="revolute">
       <axis xyz="0 1 0"/>
@@ -209,7 +211,7 @@
     <link name="${prefix}thumb_DIP">
       <visual><geometry><mesh filename="${mesh_dir}/${prefix}f03_al_link_dip.stl" scale="1.0 1.0 1.0"/></geometry><origin xyz="0.00255 0.0 0.00726" rpy="${-1.57 * reflect} 0 ${3.14 * reflect}"/><material name="lightyellow"><color rgba="1.0 1.0 0.3 1.0"/></material></visual>
       <collision><geometry><box size="0.01 0.01 0.02"/></geometry><origin xyz="0 0 0" rpy="0 0 0"/></collision>
-      <inertial><mass value="${DIP_mass}"/><inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06" /></inertial>
+      <inertial><mass value="${DIP_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
     </link>
     <joint name="${prefix}thumb_DIP_joint" type="revolute">
       <axis xyz="0 1 0"/>
@@ -222,8 +224,8 @@
 
     <link name="${prefix}ee_thumb_link">
       <inertial>
-        <mass value="0.001"/>
-        <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07" />
+        <mass value="${safe_min_mass}"/>
+        <inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" />
       </inertial>
     </link>
     <joint name="${prefix}ee_th_joint" type="fixed">
@@ -233,7 +235,7 @@
 
     <link name="${prefix}motor_thumb_jo">
       <visual><geometry><box size="${motor_x} ${motor_y} ${motor_z}"/></geometry><origin xyz="0 ${0.02 * reflect} 0"/><material name="black"/></visual>
-      <inertial><mass value="${motor_mass}"/><inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" /></inertial>
+      <inertial><mass value="${motor_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
     </link>
     <joint name="${prefix}motor_thumb_jo_joint" type="fixed">
       <parent link="${prefix}knuckle_thumb"/><child link="${prefix}motor_thumb_jo"/>
@@ -241,7 +243,7 @@
     </joint>
     <link name="${prefix}pris_thumb_jo">
       <visual><geometry><box size="${pris_x} ${pris_y} ${pris_z}"/></geometry><origin xyz="0 0 0"/><material name="black"/></visual>
-      <inertial><mass value="${safe_dummy_mass}"/><inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" /></inertial>
+      <inertial><mass value="${safe_dummy_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
     </link>
     <joint name="${prefix}pris_thumb_jo_joint" type="prismatic">
       <axis xyz="0 0 -1"/><limit effort="3.0" lower="0.0" upper="${motor_max_upper}" velocity="0.1"/>
@@ -251,7 +253,7 @@
 
     <link name="${prefix}motor_thumb_DIP">
       <visual><geometry><box size="${motor_x} ${motor_y} ${motor_z}"/></geometry><origin xyz="0 ${0.02 * reflect} 0"/><material name="black"/></visual>
-      <inertial><mass value="${DIP_mass}"/><inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06" /></inertial>
+      <inertial><mass value="${safe_min_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
     </link>
     <joint name="${prefix}motor_thumb_DIP_joint" type="fixed">
       <parent link="${prefix}thumb_joint"/><child link="${prefix}motor_thumb_DIP"/>
@@ -259,7 +261,7 @@
     </joint>
     <link name="${prefix}pris_thumb_DIP">
       <visual><geometry><box size="${pris_x} ${pris_y} ${pris_z}"/></geometry><origin xyz="0 0 0"/><material name="black"/></visual>
-      <inertial><mass value="${safe_dummy_mass}"/><inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05" /></inertial>
+      <inertial><mass value="${safe_dummy_mass}"/><inertia ixx="${safe_inertia}" ixy="0.0" ixz="0.0" iyy="${safe_inertia}" iyz="0.0" izz="${safe_inertia}" /></inertial>
     </link>
     <joint name="${prefix}pris_thumb_DIP_joint" type="prismatic">
       <axis xyz="0 0 -1"/><limit effort="3.0" lower="0.0" upper="${motor_max_upper}" velocity="0.1"/>

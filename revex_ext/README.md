@@ -1,124 +1,97 @@
-# 🤖 RevExBot: Mixture of Experts (MoE) RL Architecture
+# RevExBot – Universal Humanoid Motion Brain
 
-**Version:** 1.0.0 (Production Release)  
-**Hardware Target:** Radxa CM5 Edge Compute (200Hz Control Loop)  
-**Frameworks:** Isaac Lab (Orbit) | RL-Games | SKRL  
-**Compute Infrastructure:** Split-Node (RTX 4070 Ti Vision Node + DGX 128GB Sim Node)
-
-This repository contains the Out-of-Tree Isaac Lab extension for the **RevExBot Humanoid**. It defines a fully autonomous, closed-loop "Video-to-Robot" manufacturing plant. The architecture progresses through three strict, sequential phases to bridge the Sim-to-Real gap, culminating in a **Tri-Domain Mixture of Experts**.
+A production‑grade reinforcement learning system that trains a **single unified policy** to master locomotion, agility, combat, dance, and precision manipulation on a custom 39‑DOF humanoid robot.
 
 ---
 
-## 📂 Repository Architecture
+## Architecture
 
-```text
+- **Unified Environment** – `envs/revex_ase_env_cfg.py` + `envs/revex_ase_env.py`  
+  Single, phase‑aware Isaac Lab environment combining all skill domains with dynamic reward modulation.
+- **ASE Policy** – `models/ase_policy.py`  
+  Split‑head actor‑critic with causal CNN history, variational motion encoder, zoned exploration, and asymmetric critic.
+- **Custom Training Loop** – `scripts/train.py`  
+  Hybrid SKRL + custom PPO loop with Two‑Time‑Scale Update Rule (TTUR), teleportation masking, dual AMP scalers, and accuracy‑gated discriminator updates.
+- **Data Pipeline** – `pipeline/`  
+  YouTube harvesting → scene splitting → 3D pose extraction → 39‑DOF retargeting → unified motion library compilation.
+
+---
+
+## Quick Start
+
+### 1. Install Dependencies
+```bash
+cd RevExBot
+pip install -e .
+2. Build the Motion Library (Data Pipeline)
+bash
+cd revex_ext/pipeline
+forge.bat
+This will:
+
+Search and download ~1000 solo, full‑body videos from YouTube.
+
+Split them into single‑skill clips based on motion pauses.
+
+Extract 3D body + hand landmarks using YOLOv8‑pose and MediaPipe Holistic.
+
+Retarget the 75 landmarks to the RevExBot’s 39‑DOF skeleton.
+
+Compile everything into data/unified_motion_library.json.
+
+3. Phase 1 – Base Locomotion
+bash
+cd revex_ext/scripts
+run.bat 1
+Trains a robust walking policy (8192 parallel environments, no style data).
+Checkpoints are saved every 500 iterations.
+
+4. Phase 2 – ASE Style Training
+bash
+run.bat 2 "..\checkpoints\checkpoint_phase1_iter15000.pt"
+Adds adversarial style embedding using the motion library and discriminator.
+The policy learns to walk, dance, strike, and manipulate with human‑like motion.
+
+5. Play / Export
+bash
+# Visualise a trained policy
+python play.py --phase 2 --checkpoint ..\checkpoints\checkpoint_phase2_iter15000.pt --skill_id combat_jab
+
+# Export to ONNX for edge deployment
+python export_onnx.py --checkpoint ..\checkpoints\checkpoint_phase2_iter15000.pt
+Key Features
+39‑DOF split‑head policy – protects delicate finger gradients from torso‑scale forces.
+
+Causal CNN history – 10‑frame temporal context with strict left‑padding (no future leakage).
+
+Kinetic‑Aware Latent Mixup (KALM) – smooths latent space transitions while preventing kinetic cancellation.
+
+Sim‑to‑Real hardening – stochastic action delay, EKF‑style velocity noise, dynamic impedance morphing, ice‑finger friction, and actuator gain randomisation.
+
+Phase‑aware training – Phase 1 pure locomotion, Phase 2 adversarial style embedding with KL annealing.
+
+Fully vectorised motion library manager – O(1) phase advancement, padded GPU timelines, KNN‑bounded mixup.
+
+Repository Structure
+text
 revex_ext/
-├── setup.py                   # Global package installer (pip install -e .)
-├── cfg/
-│   ├── env_config.yaml        # Hardware & Factory Orchestration (Vision vs DGX)
-│   └── train/                 # Hyperparameters (RL-Games YAMLs & SKRL Configs)
-├── data/                      # 🔒 Immutable Data Vault
-│   ├── motions/               # .npy Kinematic Reference Manifolds (AMP)
-│   ├── weights/               # Frozen Expert .pth Checkpoints
-│   └── expert_registry.json   # Global tracker for trained MoE brains
-├── envs/
-│   ├── __init__.py            # Dynamic Gymnasium Task Registry
-│   ├── loco/                  # Phase 1: Base Locomotion
-│   ├── agile/                 # Phase 2: Rough Terrain Recovery
-│   └── skills/                # Phase 3: The Tri-Domain Experts
-│       ├── revex_scene_cfg.py       # Unified 148-float tensor blueprint
-│       ├── revex_combat_cfg.py      # High-Torque AMP 
-│       ├── revex_dance_cfg.py       # Fluid Momentum AMP (scale=0.0 sink)
-│       └── revex_precision_cfg.py   # Soft-grasp tactile manipulation
-├── pipeline/                  # 🏭 Autonomous Video-to-Robot Factory
-│   ├── video_ingestion_daemon.py
-│   ├── kinematic_retargeter.py
-│   └── master_factory.py
-├── raw_media/                 # Drop Zone for raw .mp4 reference videos
-└── scripts/
-    ├── train.py               # Multi-Phase RL Runner (Expert, Router, Finetune)
-    └── play.py                # Universal Visualizer
-🛠️ Infrastructure Strategy
-RL and Vision compute are heavily bottlenecked when run on the same GPU. This pipeline uses a distributed TICK-TOCK Data Engine:
-
-TICK (RTX 4070 Ti): Runs video_ingestion_daemon.py. Ingests raw .mp4 files, utilizes Tensor Cores for SMPL-X pose extraction, and exports mathematical .npy trajectories.
-
-TOCK (DGX Spark 128GB): Runs Isaac Lab and SKRL. Compiles the .npy files into PyTorch weights across 16,384+ parallel environments with massive AMP discriminator buffers.
-
-🚀 Phase 1 & 2: The Base Survival Instincts
-Before learning specialized skills, the robot must master basic physical survival.
-These phases are trained using the RL-Games backend (SGD + Momentum).
-
-Phase 1: Base Locomotion
-Teaches flat-ground balancing, walking, and turning with an energy-efficient athletic crouch.
-
-
-python scripts/train.py --task RevEx-Loco-v0 --phase expert --headless
-Phase 2: Agile Recovery
-Transfers the Phase 1 walking policy to rough terrain (stairs, gaps). Injects hardware latency, thermal derating, and lateral shoves.
-
-
-python scripts/train.py --task RevEx-Agile-v0 --phase expert --headless
-(Copy resulting weights to data/weights/expert_loco_v1.pth and expert_agile_v1.pth)
-
-🧠 Phase 3: The Tri-Domain Mixture of Experts (MoE)
-Phase 3 abandons monolithic architectures for a pure PyTorch SKRL implementation. We forge three distinct experts that share a mathematically identical 148-float observation tensor, allowing a Master Router to seamlessly switch between them at 200Hz.
-
-Domain 1: Combat (Explosive Kinematics)
-High-torque martial arts strikes with extreme recoil absorption and base-engagement aiming.
-
-
-python scripts/train.py --task RevEx-Combat-v0 --phase expert --headless
-Domain 2: Dance (Momentum Dissipation)
-Fluid, graceful movements utilizing a scale=0.0 tensor sink to prevent sensory distraction while maximizing energy efficiency.
-
-
-python scripts/train.py --task RevEx-Dance-v0 --phase expert --headless
-Domain 3: Precision (Tactile Impedance)
-Delicate, sub-millimeter finger manipulation using dual-palm contact sensors and ray-cast spatial awareness.
-
-
-python scripts/train.py --task RevEx-Precision-v0 --phase expert --headless
-🏭 Autonomous Operations (The Master Factory)
-You do not need to train the Phase 3 experts manually. You can trigger the fully automated pipeline:
-
-Drop combat.mp4 or dance.mp4 into the raw_media/ directory.
-
-Launch the Orchestrator:
-
-
-python pipeline/master_factory.py
-The Orchestrator will automatically extract the kinematics, train the domain expert, save the weights to data/weights/, and register the new brain.
-
-🕸️ Routing & Fine-Tuning
-Once your Expert weights are locked in the data/weights/ vault, compile the CNS.
-
-1. Router Distillation
-Freezes all Expert neural networks. Trains only the Gating Network to route the 148-float tensor to the correct expert based on real-time commands.
-
-
-python scripts/train.py --task RevEx-Combat-v0 --phase router --headless
-2. End-to-End Smoothing
-Unfreezes all layers. Applies a 1e-5 learning rate constraint to smooth the mechanical transitions during high-speed Hot-Swaps between experts.
-
-
-python scripts/train.py --task RevEx-Combat-v0 --phase finetune --headless
-👁️ Validation
-Evaluate any expert or the final MoE Router visually:
-
-
-# Evaluate Combat Expert
-python scripts/play.py --task RevEx-Combat-v0 --checkpoint data/weights/expert_combat.pth
-
-# Evaluate Full Router
-python scripts/play.py --task RevEx-Combat-v0 --checkpoint runs/phase3/router/nn/master_router.pth
-🏁 The Final Frontier
-This README encapsulates the entire scope of the project. It outlines the Tri-Domain architecture, proves the necessity of the unified 148-float tensor, and gives clear instructions for the autonomous Factory execution.
-
-The training pipeline is officially complete.
-
-The last remaining task to bring this physical robot to life is writing export_onnx.py—the script that strips away Isaac Lab and PyTorch, converting the final MoE Router into a raw, ultra-fast C++ deployable graph for the Radxa CM5 edge board.
-
-Code
-
----
+├── assets/               # Robot URDF loader
+├── cfg/                  # YAML configs (environment, Phase 1 & 2)
+│   └── train/
+├── data/                 # Motion library, checkpoints, logs
+├── envs/                 # Unified environment + custom MDP
+├── models/               # ASE policy & discriminator
+├── pipeline/             # Data factory
+│   ├── scrape_youtube.py # YouTube harvester
+│   ├── ingest_media.py   # Scene splitter
+│   ├── extract_kinematics.py # 3D pose extraction
+│   ├── retarget_urdf.py  # 39‑DOF retargeting
+│   ├── build_library.py  # Motion library compiler
+│   ├── motion_library_manager.py # Training‑time manager
+│   ├── forge.bat         # Data pipeline orchestrator
+│   └── req/              # ffmpeg / ffprobe binaries
+└── scripts/              # Training, play, export, batch files
+    ├── train.py
+    ├── play.py
+    ├── export_onnx.py
+    └── run.bat

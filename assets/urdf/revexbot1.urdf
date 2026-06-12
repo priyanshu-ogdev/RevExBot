@@ -706,7 +706,7 @@
     </collision>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_wrist_plate_joint" type="fixed">
@@ -750,7 +750,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_knuckle_index_joint" type="fixed">
@@ -774,7 +774,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_index_MCP_joint" type="revolute">
@@ -802,7 +802,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_index_PIP_joint" type="revolute">
@@ -831,8 +831,8 @@
       <origin rpy="0 0 0" xyz="0.0 0.0 0.01"/>
     </collision>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_index_DIP_joint" type="revolute">
@@ -846,8 +846,8 @@
   </joint>
   <link name="rh_ee_index_link">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_ee_index_joint" type="fixed">
@@ -867,7 +867,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_index_joint" type="fixed">
@@ -885,7 +885,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_index_joint" type="prismatic">
@@ -905,7 +905,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_knuckle_middle_joint" type="fixed">
@@ -929,7 +929,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_middle_MCP_joint" type="revolute">
@@ -957,7 +957,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_middle_PIP_joint" type="revolute">
@@ -986,8 +986,8 @@
       <origin rpy="0 0 0" xyz="0.0 0.0 0.01"/>
     </collision>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_middle_DIP_joint" type="revolute">
@@ -1001,8 +1001,8 @@
   </joint>
   <link name="rh_ee_middle_link">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_ee_middle_joint" type="fixed">
@@ -1022,7 +1022,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_middle_joint" type="fixed">
@@ -1040,7 +1040,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_middle_joint" type="prismatic">
@@ -1060,7 +1060,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_knuckle_ring_joint" type="fixed">
@@ -1084,7 +1084,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_ring_MCP_joint" type="revolute">
@@ -1112,7 +1112,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_ring_PIP_joint" type="revolute">
@@ -1141,8 +1141,8 @@
       <origin rpy="0 0 0" xyz="0.0 0.0 0.01"/>
     </collision>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_ring_DIP_joint" type="revolute">
@@ -1156,8 +1156,8 @@
   </joint>
   <link name="rh_ee_ring_link">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_ee_ring_joint" type="fixed">
@@ -1177,7 +1177,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_ring_joint" type="fixed">
@@ -1195,7 +1195,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_ring_joint" type="prismatic">
@@ -1215,7 +1215,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_knuckle_little_joint" type="fixed">
@@ -1239,7 +1239,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_little_MCP_joint" type="revolute">
@@ -1267,7 +1267,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_little_PIP_joint" type="revolute">
@@ -1296,8 +1296,8 @@
       <origin rpy="0 0 0" xyz="0.0 0.0 0.01"/>
     </collision>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_little_DIP_joint" type="revolute">
@@ -1311,8 +1311,8 @@
   </joint>
   <link name="rh_ee_little_link">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_ee_little_joint" type="fixed">
@@ -1332,7 +1332,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_little_joint" type="fixed">
@@ -1350,7 +1350,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_little_joint" type="prismatic">
@@ -1370,7 +1370,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_knuckle_thumb_joint" type="fixed">
@@ -1394,7 +1394,7 @@
     </collision>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_thumb_jo_joint" type="revolute">
@@ -1422,7 +1422,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_thumb_MCP_joint" type="revolute">
@@ -1451,8 +1451,8 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_thumb_DIP_joint" type="revolute">
@@ -1466,8 +1466,8 @@
   </joint>
   <link name="rh_ee_thumb_link">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_ee_th_joint" type="fixed">
@@ -1485,7 +1485,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_thumb_jo_joint" type="fixed">
@@ -1503,7 +1503,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_thumb_jo_joint" type="prismatic">
@@ -1522,8 +1522,8 @@
       <material name="black"/>
     </visual>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_motor_thumb_DIP_joint" type="fixed">
@@ -1541,7 +1541,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="rh_pris_thumb_DIP_joint" type="prismatic">
@@ -1569,7 +1569,7 @@
     </collision>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_wrist_plate_joint" type="fixed">
@@ -1613,7 +1613,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_knuckle_index_joint" type="fixed">
@@ -1637,7 +1637,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_index_MCP_joint" type="revolute">
@@ -1665,7 +1665,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_index_PIP_joint" type="revolute">
@@ -1694,8 +1694,8 @@
       <origin rpy="0 0 0" xyz="0.0 0.0 0.01"/>
     </collision>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_index_DIP_joint" type="revolute">
@@ -1709,8 +1709,8 @@
   </joint>
   <link name="lh_ee_index_link">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_ee_index_joint" type="fixed">
@@ -1730,7 +1730,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_index_joint" type="fixed">
@@ -1748,7 +1748,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_index_joint" type="prismatic">
@@ -1768,7 +1768,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_knuckle_middle_joint" type="fixed">
@@ -1792,7 +1792,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_middle_MCP_joint" type="revolute">
@@ -1820,7 +1820,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_middle_PIP_joint" type="revolute">
@@ -1849,8 +1849,8 @@
       <origin rpy="0 0 0" xyz="0.0 0.0 0.01"/>
     </collision>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_middle_DIP_joint" type="revolute">
@@ -1864,8 +1864,8 @@
   </joint>
   <link name="lh_ee_middle_link">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_ee_middle_joint" type="fixed">
@@ -1885,7 +1885,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_middle_joint" type="fixed">
@@ -1903,7 +1903,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_middle_joint" type="prismatic">
@@ -1923,7 +1923,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_knuckle_ring_joint" type="fixed">
@@ -1947,7 +1947,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_ring_MCP_joint" type="revolute">
@@ -1975,7 +1975,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_ring_PIP_joint" type="revolute">
@@ -2004,8 +2004,8 @@
       <origin rpy="0 0 0" xyz="0.0 0.0 0.01"/>
     </collision>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_ring_DIP_joint" type="revolute">
@@ -2019,8 +2019,8 @@
   </joint>
   <link name="lh_ee_ring_link">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_ee_ring_joint" type="fixed">
@@ -2040,7 +2040,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_ring_joint" type="fixed">
@@ -2058,7 +2058,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_ring_joint" type="prismatic">
@@ -2078,7 +2078,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_knuckle_little_joint" type="fixed">
@@ -2102,7 +2102,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_little_MCP_joint" type="revolute">
@@ -2130,7 +2130,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_little_PIP_joint" type="revolute">
@@ -2159,8 +2159,8 @@
       <origin rpy="0 0 0" xyz="0.0 0.0 0.01"/>
     </collision>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_little_DIP_joint" type="revolute">
@@ -2174,8 +2174,8 @@
   </joint>
   <link name="lh_ee_little_link">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_ee_little_joint" type="fixed">
@@ -2195,7 +2195,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_little_joint" type="fixed">
@@ -2213,7 +2213,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_little_joint" type="prismatic">
@@ -2233,7 +2233,7 @@
     </visual>
     <inertial>
       <mass value="0.01"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_knuckle_thumb_joint" type="fixed">
@@ -2257,7 +2257,7 @@
     </collision>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_thumb_jo_joint" type="revolute">
@@ -2285,7 +2285,7 @@
     </collision>
     <inertial>
       <mass value="0.0125"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_thumb_MCP_joint" type="revolute">
@@ -2314,8 +2314,8 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_thumb_DIP_joint" type="revolute">
@@ -2329,8 +2329,8 @@
   </joint>
   <link name="lh_ee_thumb_link">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="1.0e-07" ixy="0.0" ixz="0.0" iyy="1.0e-07" iyz="0.0" izz="1.0e-07"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_ee_th_joint" type="fixed">
@@ -2348,7 +2348,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_thumb_jo_joint" type="fixed">
@@ -2366,7 +2366,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_thumb_jo_joint" type="prismatic">
@@ -2385,8 +2385,8 @@
       <material name="black"/>
     </visual>
     <inertial>
-      <mass value="0.0025"/>
-      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+      <mass value="0.01"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_motor_thumb_DIP_joint" type="fixed">
@@ -2404,7 +2404,7 @@
     </visual>
     <inertial>
       <mass value="0.015"/>
-      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0" iyy="1.0e-05" iyz="0.0" izz="1.0e-05"/>
+      <inertia ixx="1e-05" ixy="0.0" ixz="0.0" iyy="1e-05" iyz="0.0" izz="1e-05"/>
     </inertial>
   </link>
   <joint name="lh_pris_thumb_DIP_joint" type="prismatic">
