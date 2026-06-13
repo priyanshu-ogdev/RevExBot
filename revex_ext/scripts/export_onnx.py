@@ -64,7 +64,9 @@ def main():
 
     obs_dict = env.reset()
     actor_obs_seq = obs_dict["policy"]                 # (1, history_length, obs_dim)
-    style_code = obs_dict["style_code"]                # (1, latent_dim)
+
+    # 🚨 FIX: style code is stored in ase_data, not a separate observation key
+    style_code = env.unwrapped.extras["ase_data"]["z"]  # (1, latent_dim)
 
     actor_obs_dim = actor_obs_seq.shape[-1]            # single‑step observation size
     critic_obs_dim = obs_dict["critic"].shape[-1]

@@ -39,7 +39,9 @@ device = env_cfg.sim.device
 
 obs_dict = env.reset()
 act_dim = env.action_space.shape[0]
-style_code_dim = obs_dict["style_code"].shape[-1]
+
+# 🚨 FIX: style code is stored in ase_data, not a separate observation key
+style_code_dim = env.unwrapped.extras["ase_data"]["z"].shape[-1]
 
 # 4. Load policy
 policy = ASEHistoryPolicy(
@@ -75,8 +77,9 @@ print("\n🚀 Running policy. Press Ctrl+C to stop.")
 try:
     with torch.no_grad():
         while simulation_app.is_running():
-            # Standard policy forward pass
-            action, _, _ = policy.get_action(obs_dict["policy"], obs_dict["critic"], obs_dict["style_code"])
+            # Read z from the environment's ase_data
+            z = env.unwrapped.extras["ase_data"]["z"]
+            action, _, _ = policy.get_action(obs_dict["policy"], obs_dict["critic"], z)
             
             # Step environment
             obs_dict, _, _, _, _ = env.step(action)

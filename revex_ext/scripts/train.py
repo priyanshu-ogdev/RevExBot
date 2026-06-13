@@ -51,11 +51,12 @@ device = env_cfg.sim.device
 obs_dict = env.reset()
 actor_obs_seq = obs_dict["policy"]               # (num_envs, 10, single_obs_dim)
 critic_obs_flat = obs_dict["critic"]             # (num_envs, critic_obs_dim)
-style_code_dim = obs_dict["style_code"].shape[-1]
 
-actor_obs_dim = actor_obs_seq.shape[-1]          # single‑step observation size
+actor_obs_dim = actor_obs_seq.shape[-1]          # single‑step observation size (~270)
 critic_obs_dim = critic_obs_flat.shape[-1]
 act_dim = env.action_space.shape[0]              # 39
+kinematic_obs_dim = 39                           # joint positions are at indices 3:42
+style_code_dim = 16
 
 # ----------------------------------------------------------------------
 # 2. Models & optimisers
@@ -65,7 +66,7 @@ policy = ASEHistoryPolicy(obs_dim=actor_obs_dim, critic_obs_dim=critic_obs_dim,
 policy.train()
 
 if args.phase == 2:
-    discriminator = ASEDiscriminator(obs_dim=actor_obs_dim, latent_dim=style_code_dim).to(device)
+    discriminator = ASEDiscriminator(obs_dim=kinematic_obs_dim, latent_dim=style_code_dim).to(device)
     discriminator.train()
 
     # Motion library manager
@@ -83,7 +84,6 @@ if args.phase == 2:
     policy_opt = torch.optim.SGD(policy.parameters(), lr=1e-3, momentum=0.9, weight_decay=1e-5)
     disc_opt   = torch.optim.SGD(discriminator.parameters(), lr=1e-4, momentum=0.9, weight_decay=1e-5)
 
-    # Separate AMP scalers to prevent discriminator NaN from scaling policy gradients
     disc_scaler = torch.cuda.amp.GradScaler(enabled=torch.cuda.is_available())
 else:
     policy_opt = torch.optim.SGD(policy.parameters(), lr=1e-3, momentum=0.9, weight_decay=1e-5)
@@ -91,7 +91,22 @@ else:
 policy_scaler = torch.cuda.amp.GradScaler(enabled=torch.cuda.is_available())
 
 # ----------------------------------------------------------------------
-# 3. Training hyperparameters
+# 3. Load checkpoint if provided
+# ----------------------------------------------------------------------
+start_iteration = 0
+if args.checkpoint and os.path.isfile(args.checkpoint):
+    print(f"📥 Loading checkpoint: {args.checkpoint}")
+    ckpt = torch.load(args.checkpoint, map_location=device)
+    policy.load_state_dict(ckpt["policy"])
+    policy_opt.load_state_dict(ckpt["optimizer"])
+    start_iteration = ckpt.get("iteration", 0) + 1
+    if args.phase == 2 and "discriminator" in ckpt:
+        discriminator.load_state_dict(ckpt["discriminator"])
+        disc_opt.load_state_dict(ckpt["disc_optimizer"])
+    print(f"   Resuming from iteration {start_iteration}")
+
+# ----------------------------------------------------------------------
+# 4. Training hyperparameters
 # ----------------------------------------------------------------------
 rollout_steps = 64 if args.phase == 1 else 96
 total_iterations = 15000
@@ -100,7 +115,7 @@ mini_batch_size = 2048 if args.phase == 1 else 1024
 disc_accuracy_threshold = 0.85
 
 # Pre‑allocate rollout buffers (GPU)
-actor_obs_buffer      = torch.zeros(rollout_steps, num_envs, actor_obs_seq.shape[1], actor_obs_dim, device=device)
+actor_obs_buffer      = torch.zeros(rollout_steps, num_envs, 10, actor_obs_dim, device=device)
 next_actor_obs_buffer = torch.zeros_like(actor_obs_buffer)
 critic_obs_buffer     = torch.zeros(rollout_steps, num_envs, critic_obs_dim, device=device)
 style_buffer          = torch.zeros(rollout_steps, num_envs, style_code_dim, device=device)
@@ -113,23 +128,21 @@ done_buffer           = torch.zeros(rollout_steps, num_envs, device=device)
 writer = SummaryWriter(log_dir=f"runs/rev_ex_ase_phase{args.phase}")
 
 # ----------------------------------------------------------------------
-# 4. Initial state for style reward (Phase 2)
+# 5. Initial state for style reward (Phase 2)
 # ----------------------------------------------------------------------
 obs_dict = env.reset()
 if args.phase == 2:
     env.unwrapped._last_state = obs_dict["policy"][:, -1, :].detach()
 
-global_step = 0
-
 # ----------------------------------------------------------------------
-# 5. Training loop
+# 6. Training loop
 # ----------------------------------------------------------------------
-for iteration in range(total_iterations):
+for iteration in range(start_iteration, total_iterations):
     # ---------- Rollout ----------
     for step in range(rollout_steps):
         actor_seq   = obs_dict["policy"]            # (N, 10, dim)
         critic_flat = obs_dict["critic"]            # (N, critic_dim)
-        z           = obs_dict["style_code"]        # (N, 16)
+        z           = env.unwrapped.extras["ase_data"]["z"]   # (N, 16)
 
         with torch.no_grad():
             action, log_prob, value = policy.get_action(actor_seq, critic_flat, z)
@@ -137,7 +150,7 @@ for iteration in range(total_iterations):
         next_obs, reward, terminated, truncated, info = env.step(action)
         done = terminated.logical_or(truncated).float()
 
-        # Detach all tensors to prevent discriminator gradient leakage
+        # Detach all tensors
         actor_obs_buffer[step]      = actor_seq.detach()
         next_actor_obs_buffer[step] = next_obs["policy"].detach()
         critic_obs_buffer[step]     = critic_flat.detach()
@@ -150,9 +163,10 @@ for iteration in range(total_iterations):
 
         obs_dict = next_obs
 
-    # ---------- GAE with correct bootstrap ----------
+    # ---------- GAE ----------
     with torch.no_grad():
-        _, _, last_val = policy.get_action(obs_dict["policy"], obs_dict["critic"], obs_dict["style_code"])
+        _, _, last_val = policy.get_action(obs_dict["policy"], obs_dict["critic"],
+                                           env.unwrapped.extras["ase_data"]["z"])
 
     T, N = rollout_steps, num_envs
     advantages = torch.zeros_like(value_buffer)
@@ -166,9 +180,9 @@ for iteration in range(total_iterations):
         advantages[t] = gae
         returns[t]    = gae + value_buffer[t]
 
-    # Flatten all buffers
-    flat_actor      = actor_obs_buffer.reshape(T*N, *actor_obs_buffer.shape[2:])
-    flat_next_actor = next_actor_obs_buffer.reshape(T*N, *next_actor_obs_buffer.shape[2:])
+    # Flatten
+    flat_actor      = actor_obs_buffer.reshape(T*N, 10, actor_obs_dim)
+    flat_next_actor = next_actor_obs_buffer.reshape(T*N, 10, actor_obs_dim)
     flat_critic     = critic_obs_buffer.reshape(T*N, -1)
     flat_styles     = style_buffer.reshape(T*N, -1)
     flat_actions    = action_buffer.reshape(T*N, -1)
@@ -181,44 +195,46 @@ for iteration in range(total_iterations):
 
     # ---------- Discriminator Update (Phase 2) ----------
     if args.phase == 2:
-        fake_s      = flat_actor[:, -1, :]             # last observation of sequence
-        fake_s_next = flat_next_actor[:, -1, :]        # true next observation
+        fake_s      = flat_actor[:, -1, 3:42]        # 39‑dim joint positions
+        fake_s_next = flat_next_actor[:, -1, 3:42]
         fake_z      = flat_styles
 
-        # ---- Teleportation mask: drop transitions that crossed an episode boundary ----
         valid_mask = (1.0 - flat_dones).bool()
         valid_fake_s      = fake_s[valid_mask]
         valid_fake_s_next = fake_s_next[valid_mask]
         valid_fake_z      = fake_z[valid_mask]
 
-        real_s, real_s_next, real_z = motion_manager.sample_real_transitions(
-            batch_size=valid_fake_s.size(0), device=device
-        )
+        if valid_fake_s.size(0) > 0:
+            real_s, real_s_next, real_z = motion_manager.sample_real_transitions(
+                batch_size=valid_fake_s.size(0), device=device
+            )
 
-        # ---- Pre‑evaluate accuracy to gate update ----
-        with torch.no_grad():
-            with torch.cuda.amp.autocast(enabled=True):
-                eval_fake_logits = discriminator(valid_fake_s, valid_fake_s_next, valid_fake_z)
-                eval_real_logits = discriminator(real_s, real_s_next, real_z)
-            real_acc = (eval_real_logits > 0).float().mean()
-            fake_acc = (eval_fake_logits < 0).float().mean()
-            disc_acc = (real_acc + fake_acc) / 2.0
+            with torch.no_grad():
+                with torch.cuda.amp.autocast(enabled=True):
+                    eval_fake_logits = discriminator(valid_fake_s, valid_fake_s_next, valid_fake_z)
+                    eval_real_logits = discriminator(real_s, real_s_next, real_z)
+                real_acc = (eval_real_logits > 0).float().mean()
+                fake_acc = (eval_fake_logits < 0).float().mean()
+                disc_acc = (real_acc + fake_acc) / 2.0
 
-        if disc_acc <= disc_accuracy_threshold:
-            disc_opt.zero_grad()
-            with torch.cuda.amp.autocast(enabled=True):
-                fake_logits = discriminator(valid_fake_s, valid_fake_s_next, valid_fake_z)
-                real_logits = discriminator(real_s, real_s_next, real_z)
-                disc_loss = 0.5 * (
-                    nn.functional.binary_cross_entropy_with_logits(real_logits, torch.ones_like(real_logits)) +
-                    nn.functional.binary_cross_entropy_with_logits(fake_logits, torch.zeros_like(fake_logits))
-                )
-            disc_scaler.scale(disc_loss).backward()
-            disc_scaler.unscale_(disc_opt)
-            nn.utils.clip_grad_norm_(discriminator.parameters(), 1.0)
-            disc_scaler.step(disc_opt)
-            disc_scaler.update()
+            if disc_acc <= disc_accuracy_threshold:
+                disc_opt.zero_grad()
+                with torch.cuda.amp.autocast(enabled=True):
+                    fake_logits = discriminator(valid_fake_s, valid_fake_s_next, valid_fake_z)
+                    real_logits = discriminator(real_s, real_s_next, real_z)
+                    disc_loss = 0.5 * (
+                        nn.functional.binary_cross_entropy_with_logits(real_logits, torch.ones_like(real_logits)) +
+                        nn.functional.binary_cross_entropy_with_logits(fake_logits, torch.zeros_like(fake_logits))
+                    )
+                disc_scaler.scale(disc_loss).backward()
+                disc_scaler.unscale_(disc_opt)
+                nn.utils.clip_grad_norm_(discriminator.parameters(), 1.0)
+                disc_scaler.step(disc_opt)
+                disc_scaler.update()
+            else:
+                disc_loss = torch.tensor(0.0, device=device)
         else:
+            disc_acc = torch.tensor(0.0, device=device)
             disc_loss = torch.tensor(0.0, device=device)
 
     # ---------- PPO Update ----------
@@ -241,7 +257,7 @@ for iteration in range(total_iterations):
                 batch_actor, batch_critic, batch_z, batch_actions
             )
 
-            # Advantage normalisation
+            # Normalise advantages per mini‑batch
             batch_advantages = (batch_advantages - batch_advantages.mean()) / (batch_advantages.std() + 1e-8)
 
             ratio = torch.exp(new_log_probs - batch_old_log_probs)
@@ -290,10 +306,8 @@ for iteration in range(total_iterations):
             })
         torch.save(checkpoint, f"checkpoint_phase{args.phase}_iter{iteration}.pt")
 
-    global_step += T * N
-
 # ----------------------------------------------------------------------
-# 6. Cleanup
+# 7. Cleanup
 # ----------------------------------------------------------------------
 env.close()
 writer.close()
