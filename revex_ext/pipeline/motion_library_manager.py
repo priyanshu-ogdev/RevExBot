@@ -86,9 +86,12 @@ class MotionLibraryManager:
 
         if data["desired_contacts"] is None:
             data["desired_contacts"] = torch.zeros((env.num_envs, 4), device=self.device)
+            
         if data["start_joint_pos"] is None:
-            data["start_joint_pos"] = torch.zeros((env.num_envs, self.mocap_dim), device=self.device)
-            data["start_joint_vel"] = torch.zeros((env.num_envs, self.mocap_dim), device=self.device)
+            # 🚨 FIX: Initialize the buffer with the safe Athletic Stance, not zeros!
+            data["start_joint_pos"] = env.scene["robot"].data.default_joint_pos.clone()
+            data["start_joint_vel"] = env.scene["robot"].data.default_joint_vel.clone()
+            
         if not hasattr(env, "_clip_idx"):
             env._clip_idx = torch.zeros(env.num_envs, dtype=torch.long, device=self.device)
             env._clip_total_frames = torch.zeros(env.num_envs, dtype=torch.long, device=self.device)
@@ -107,7 +110,11 @@ class MotionLibraryManager:
             data["is_precision_mode"][loco_ids] = False
             data["desired_contacts"][loco_ids] = 0.0
             data["stiffness_mult"][loco_ids] = 1.0
-
+            
+            # 🚨 FIX: Re-apply the Athletic Stance for Loco resets so they don't inherit previous skill poses
+            data["start_joint_pos"][loco_ids] = env.scene["robot"].data.default_joint_pos[loco_ids]
+            data["start_joint_vel"][loco_ids] = env.scene["robot"].data.default_joint_vel[loco_ids]
+            
         if is_skill.any():
             skill_ids = env_ids[is_skill]
             n_skills = len(skill_ids)

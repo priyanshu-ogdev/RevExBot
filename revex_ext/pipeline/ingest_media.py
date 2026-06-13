@@ -1,14 +1,15 @@
 """
 Module 1 – Scene Splitter (Motion-Based)
 Segments long videos into single-skill clips based on motion pauses.
-Uses downscaled Farneback optical flow for i9 CPU survival.
-Uses FFmpeg with CRF 18, thread-throttling, and audio stripping.
+Uses downscaled Farneback optical flow for CPU survival.
+Uses FFmpeg with CRF 18, frame-accurate seeking, and audio stripping.
 Reads from root ../data/raw_media/ and writes to ../data/split_clips/
 """
 
 import os
 import cv2
 import subprocess
+import shutil
 import numpy as np
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -18,7 +19,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # ----------------------------------------------------------------------
 # __file__ is in revex_ext/pipeline/
 PIPELINE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(PIPELINE_DIR) 
+PROJECT_ROOT = os.path.dirname(PIPELINE_DIR)
 
 # Data goes to root, requirements stay in pipeline
 RAW_DIR = os.path.join(PROJECT_ROOT, "data", "raw_media")
@@ -34,7 +35,9 @@ MIN_CLIP_DURATION = 1.5          # seconds
 MAX_CLIP_DURATION = 8.0          # seconds
 MOTION_PAUSE_THRESHOLD = 0.02    # average flow magnitude
 PAUSE_HOLD_FRAMES = 15           # consecutive still frames before cutting
-MAX_WORKERS = 8                  # Parallel threads
+
+# 🚨 FIX 3: Dynamic Thread Limiting (Leaves breathing room for the OS and FFmpeg)
+MAX_WORKERS = max(1, os.cpu_count() // 2)
 
 def optical_flow_magnitude(prev_gray, curr_gray):
     """Average Farneback optical flow magnitude between two downscaled frames."""
@@ -42,7 +45,7 @@ def optical_flow_magnitude(prev_gray, curr_gray):
     mag = np.sqrt(flow[..., 0] ** 2 + flow[..., 1] ** 2)
     return np.mean(mag)
 
-def split_video_motion(video_path: str, output_dir: str):
+def split_video_motion(video_path: str, output_dir: str, ffmpeg_path: str):
     """Split video into motion-segmented clips and export via FFmpeg."""
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -53,7 +56,6 @@ def split_video_motion(video_path: str, output_dir: str):
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     clips = []
 
-    # Strict resource management to prevent RAM leaks
     try:
         ret, prev_frame = cap.read()
         if not ret:
@@ -88,29 +90,24 @@ def split_video_motion(video_path: str, output_dir: str):
 
             clip_duration = (frame_idx - clip_start) / fps
             
-            # Cut when we have been still long enough
             if still_counter >= PAUSE_HOLD_FRAMES and clip_duration >= MIN_CLIP_DURATION:
                 clips.append((clip_start / fps, (frame_idx - still_counter) / fps))
                 clip_start = frame_idx
                 still_counter = 0
-            # Force cut if max duration exceeded
             elif clip_duration > MAX_CLIP_DURATION:
                 clips.append((clip_start / fps, frame_idx / fps))
                 clip_start = frame_idx
                 still_counter = 0
 
-        # Final segment
         final_dur = (total_frames - clip_start) / fps
         if final_dur >= MIN_CLIP_DURATION:
             clips.append((clip_start / fps, total_frames / fps))
 
     finally:
-        # Guarantee RAM is freed even if the video file is corrupt
         cap.release()
 
     # --- FFmpeg Export Logic ---
     video_name = Path(video_path).stem
-    ffmpeg_path = os.path.join(REQ_DIR, "ffmpeg.exe")
 
     for i, (start_sec, end_sec) in enumerate(clips):
         duration = end_sec - start_sec
@@ -119,12 +116,12 @@ def split_video_motion(video_path: str, output_dir: str):
             
         out_path = os.path.join(output_dir, f"{video_name}_clip{i:03d}.mp4")
         
-        # Audio dropped (-an), CPU throttled (-threads 3), frame-perfect seek (-ss before -i)
+        # 🚨 FIX 1 & 3: -ss AFTER -i for frame-accuracy. Threads reduced to 2.
         cmd = [
             ffmpeg_path, "-y", "-hide_banner", "-loglevel", "error",
-            "-ss", str(start_sec), "-i", video_path, "-t", str(duration),
+            "-i", video_path, "-ss", str(start_sec), "-t", str(duration),
             "-c:v", "libx264", "-preset", "fast", "-crf", "18",
-            "-threads", "3", "-an",  
+            "-threads", "2", "-an",
             out_path
         ]
         try:
@@ -136,9 +133,9 @@ def split_video_motion(video_path: str, output_dir: str):
     if clips:
         print(f"  ✅ {len(clips)} clips saved from {video_name}.")
 
-def process_video(video_path: str):
+def process_video(video_path: str, ffmpeg_path: str):
     try:
-        split_video_motion(video_path, CLIPS_DIR)
+        split_video_motion(video_path, CLIPS_DIR, ffmpeg_path)
         return f"✅ Processed: {Path(video_path).name}"
     except Exception as e:
         return f"❌ Failed: {Path(video_path).name} ({e})"
@@ -148,16 +145,27 @@ def main():
     video_files = [f for f in os.listdir(RAW_DIR) if f.lower().endswith(video_ext)]
     
     if not video_files:
-        print(f"❌ No videos found in {RAW_DIR}. Run scrape_youtube.py first.")
+        print(f"❌ No videos found in {RAW_DIR}. Please add raw media first.")
+        return
+
+    # 🚨 FIX 2: Windows-Hardened FFmpeg Resolution
+    local_ffmpeg = os.path.join(REQ_DIR, "ffmpeg.exe")
+    if os.path.exists(local_ffmpeg):
+        ffmpeg_path = local_ffmpeg
+    else:
+        ffmpeg_path = shutil.which("ffmpeg")
+        
+    if not ffmpeg_path:
+        print("❌ FFmpeg not found in req/ folder or system PATH.")
         return
 
     print(f"🚀 Ingestor Module Initialized. Found {len(video_files)} raw videos.")
-    print(f"⚙️  FFmpeg Path: {REQ_DIR}")
+    print(f"⚙️  FFmpeg Binary: {ffmpeg_path}")
     print(f"📂 Output Path: {CLIPS_DIR}")
     print(f"🔪 Motion-based splitting on {MAX_WORKERS} threads...\n")
     
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = {executor.submit(process_video, os.path.join(RAW_DIR, vf)): vf for vf in video_files}
+        futures = {executor.submit(process_video, os.path.join(RAW_DIR, vf), ffmpeg_path): vf for vf in video_files}
         for future in as_completed(futures):
             print(future.result())
 

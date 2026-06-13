@@ -29,9 +29,8 @@ app_launcher = AppLauncher(args)
 simulation_app = app_launcher.app
 
 # ----------------------------------------------------------------------
-# Late imports
+# Late imports – no wrapper, raw env preserves dictionary observations
 # ----------------------------------------------------------------------
-from omni.isaac.lab_tasks.utils.wrappers.skrl import SkrlVecEnvWrapper
 from revex_ext.envs.revex_ase_env import RevExAseEnv
 from revex_ext.envs.revex_ase_env_cfg import RevExAseEnvCfg
 from revex_ext.agents.ase_policy import ASEHistoryPolicy, ASEDiscriminator
@@ -42,7 +41,6 @@ from revex_ext.pipeline.motion_library_manager import MotionLibraryManager
 # ----------------------------------------------------------------------
 env_cfg = RevExAseEnvCfg(phase=args.phase)
 env = RevExAseEnv(cfg=env_cfg)
-env = SkrlVecEnvWrapper(env)                     # tensor‑based interface
 
 num_envs = env_cfg.scene.num_envs                # 8192 (phase1) or 4096 (phase2)
 device = env_cfg.sim.device
@@ -69,18 +67,14 @@ if args.phase == 2:
     discriminator = ASEDiscriminator(obs_dim=kinematic_obs_dim, latent_dim=style_code_dim).to(device)
     discriminator.train()
 
-    # Motion library manager
     lib_path = env_cfg.style_config["motion_library_path"]
     if not os.path.exists(lib_path):
         raise FileNotFoundError(f"Motion library not found: {lib_path}")
     motion_manager = MotionLibraryManager(library_path=lib_path,
                                           latent_dim=style_code_dim, device=device)
     env.unwrapped.motion_library_manager = motion_manager
-
-    # Pass discriminator to environment for real‑time style reward
     env.unwrapped.set_discriminator(discriminator)
 
-    # TTUR with SGD + Nesterov momentum
     policy_opt = torch.optim.SGD(policy.parameters(), lr=1e-3, momentum=0.9, weight_decay=1e-5)
     disc_opt   = torch.optim.SGD(discriminator.parameters(), lr=1e-4, momentum=0.9, weight_decay=1e-5)
 
@@ -140,9 +134,9 @@ if args.phase == 2:
 for iteration in range(start_iteration, total_iterations):
     # ---------- Rollout ----------
     for step in range(rollout_steps):
-        actor_seq   = obs_dict["policy"]            # (N, 10, dim)
-        critic_flat = obs_dict["critic"]            # (N, critic_dim)
-        z           = env.unwrapped.extras["ase_data"]["z"]   # (N, 16)
+        actor_seq   = obs_dict["policy"]
+        critic_flat = obs_dict["critic"]
+        z           = env.unwrapped.extras["ase_data"]["z"]
 
         with torch.no_grad():
             action, log_prob, value = policy.get_action(actor_seq, critic_flat, z)
@@ -150,7 +144,6 @@ for iteration in range(start_iteration, total_iterations):
         next_obs, reward, terminated, truncated, info = env.step(action)
         done = terminated.logical_or(truncated).float()
 
-        # Detach all tensors
         actor_obs_buffer[step]      = actor_seq.detach()
         next_actor_obs_buffer[step] = next_obs["policy"].detach()
         critic_obs_buffer[step]     = critic_flat.detach()
@@ -163,7 +156,7 @@ for iteration in range(start_iteration, total_iterations):
 
         obs_dict = next_obs
 
-    # ---------- GAE ----------
+    # ---------- GAE (original logic – mask both terminations and truncations) ----------
     with torch.no_grad():
         _, _, last_val = policy.get_action(obs_dict["policy"], obs_dict["critic"],
                                            env.unwrapped.extras["ase_data"]["z"])
@@ -180,7 +173,7 @@ for iteration in range(start_iteration, total_iterations):
         advantages[t] = gae
         returns[t]    = gae + value_buffer[t]
 
-    # Flatten
+    # Flatten all buffers
     flat_actor      = actor_obs_buffer.reshape(T*N, 10, actor_obs_dim)
     flat_next_actor = next_actor_obs_buffer.reshape(T*N, 10, actor_obs_dim)
     flat_critic     = critic_obs_buffer.reshape(T*N, -1)
@@ -195,7 +188,7 @@ for iteration in range(start_iteration, total_iterations):
 
     # ---------- Discriminator Update (Phase 2) ----------
     if args.phase == 2:
-        fake_s      = flat_actor[:, -1, 3:42]        # 39‑dim joint positions
+        fake_s      = flat_actor[:, -1, 3:42]
         fake_s_next = flat_next_actor[:, -1, 3:42]
         fake_z      = flat_styles
 
@@ -209,6 +202,7 @@ for iteration in range(start_iteration, total_iterations):
                 batch_size=valid_fake_s.size(0), device=device
             )
 
+            disc_loss = torch.tensor(0.0, device=device)
             with torch.no_grad():
                 with torch.cuda.amp.autocast(enabled=True):
                     eval_fake_logits = discriminator(valid_fake_s, valid_fake_s_next, valid_fake_z)
@@ -231,13 +225,11 @@ for iteration in range(start_iteration, total_iterations):
                 nn.utils.clip_grad_norm_(discriminator.parameters(), 1.0)
                 disc_scaler.step(disc_opt)
                 disc_scaler.update()
-            else:
-                disc_loss = torch.tensor(0.0, device=device)
         else:
             disc_acc = torch.tensor(0.0, device=device)
             disc_loss = torch.tensor(0.0, device=device)
 
-    # ---------- PPO Update ----------
+    # ---------- PPO Update (with AMP autocast) ----------
     indices = torch.randperm(flat_actor.size(0), device=device)
     for epoch in range(learning_epochs):
         for start in range(0, flat_actor.size(0), mini_batch_size):
@@ -253,31 +245,29 @@ for iteration in range(start_iteration, total_iterations):
             batch_returns      = flat_returns[batch_idx]
             batch_values       = flat_values[batch_idx]
 
-            new_log_probs, entropy, new_values = policy.evaluate_actions(
-                batch_actor, batch_critic, batch_z, batch_actions
-            )
-
-            # Normalise advantages per mini‑batch
-            batch_advantages = (batch_advantages - batch_advantages.mean()) / (batch_advantages.std() + 1e-8)
-
-            ratio = torch.exp(new_log_probs - batch_old_log_probs)
-            surr1 = ratio * batch_advantages
-            surr2 = torch.clamp(ratio, 0.8, 1.2) * batch_advantages
-            policy_loss = -torch.min(surr1, surr2).mean()
-
-            # Value loss with clipping
-            values_clipped = batch_values + torch.clamp(
-                new_values - batch_values, -0.2, 0.2
-            )
-            v_loss_unclipped = (new_values - batch_returns).pow(2)
-            v_loss_clipped   = (values_clipped - batch_returns).pow(2)
-            value_loss = 0.5 * torch.max(v_loss_unclipped, v_loss_clipped).mean()
-
-            entropy_loss = -entropy.mean()
-
-            loss = policy_loss + 0.5 * value_loss + 0.01 * entropy_loss
-
             policy_opt.zero_grad()
+
+            with torch.cuda.amp.autocast(enabled=torch.cuda.is_available()):
+                new_log_probs, entropy, new_values = policy.evaluate_actions(
+                    batch_actor, batch_critic, batch_z, batch_actions
+                )
+                batch_advantages = (batch_advantages - batch_advantages.mean()) / (batch_advantages.std() + 1e-8)
+
+                ratio = torch.exp(new_log_probs - batch_old_log_probs)
+                surr1 = ratio * batch_advantages
+                surr2 = torch.clamp(ratio, 0.8, 1.2) * batch_advantages
+                policy_loss = -torch.min(surr1, surr2).mean()
+
+                values_clipped = batch_values + torch.clamp(
+                    new_values - batch_values, -0.2, 0.2
+                )
+                v_loss_unclipped = (new_values - batch_returns).pow(2)
+                v_loss_clipped   = (values_clipped - batch_returns).pow(2)
+                value_loss = 0.5 * torch.max(v_loss_unclipped, v_loss_clipped).mean()
+
+                entropy_loss = -entropy.mean()
+                loss = policy_loss + 0.5 * value_loss + 0.01 * entropy_loss
+
             policy_scaler.scale(loss).backward()
             policy_scaler.unscale_(policy_opt)
             nn.utils.clip_grad_norm_(policy.parameters(), 1.0)
