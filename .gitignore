@@ -1,0 +1,43 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE / OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+venv/
+env/
+ml/
+conda/
+
+# Logs
+logs/
+*.log
+
+# TensorBoard runs
+runs/
+
+# Training checkpoints
+checkpoints/
+*.pt
+
+# Data – raw media, clips, kinematics, retargeted, and the compiled library
+data/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.eggs/
